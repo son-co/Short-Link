@@ -1,0 +1,7 @@
+
+
+convert aggregation to server
+
+scp -r /Users/thangmai/Desktop/telco/shortlink-main/aggregation/target/shortlink-aggregation.jar  david@8.222.220.102:/home/david
+
+nohup java -jar shortlink-aggregation.jar > app.log 2>&1 & 

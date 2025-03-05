@@ -1,0 +1,22 @@
+server:
+  port: 8100
+spring:
+  application:
+    name: short-link-gateway
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://8.222.220.102:3306/telcosms_shortlink
+    username: david
+    password: david_telcosms_911
+  profiles:
+    active: aggregation
+    # active: dev
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: Test_930910
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848

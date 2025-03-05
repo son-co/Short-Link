@@ -1,0 +1,3 @@
+scp -r /Users/thangmai/Desktop/telco/shortlink-main/console-vue  david@8.222.220.102:/home/david 
+
+nohup npm run dev > app.log 2>&1 & 

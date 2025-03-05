@@ -1,0 +1,24 @@
+#root {
+  min-width: 100vw;
+  margin: 0 auto;
+  overflow-x: hidden;
+  padding: 0;
+  height: 100vh;
+}
+
+body {
+  height: 100%;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 8px;
+  background-color: white;
+  /* or add it to the track */
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #28413e;
+  border-radius: 4px;
+}

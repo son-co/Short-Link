@@ -1,0 +1,5 @@
+convert admin to server
+
+scp -r /Users/thangmai/Desktop/telco/shortlink-main/admin/target/shortlink-admin.jar  david@8.222.220.102:/home/david 
+
+nohup java -jar shortlink-admin.jar > app.log 2>&1 &

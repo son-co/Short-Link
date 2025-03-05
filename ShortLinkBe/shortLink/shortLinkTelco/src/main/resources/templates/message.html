@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Messages</title>
+</head>
+<body>
+<h1>Received Messages</h1>
+<ul>
+    <li th:each="message : ${messages}" th:text="${message}"></li>
+</ul>
+</body>
+</html>

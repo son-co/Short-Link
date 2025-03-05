@@ -1,0 +1,4 @@
+- Install node modules:
+==== yarn
+- start project
+==== yarn dev

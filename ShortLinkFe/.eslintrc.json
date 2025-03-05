@@ -1,0 +1,32 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended" // Thêm plugin TypeScript
+  ],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": ["react", "react-hooks", "@typescript-eslint"], // Thêm plugin TypeScript
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "@typescript-eslint/no-explicit-any": "warn", // Thay đổi từ 'off' thành 'warn'
+    "@typescript-eslint/explicit-module-boundary-types": "warn" // Khuyến khích rõ ràng kiểu trả về
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}

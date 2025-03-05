@@ -1,0 +1,38 @@
+"id","name","logo","description","status","name_en","short_name","code","keyword"
+1,Ngân hàng TMCP Á Châu,init/bank_logo/ACB.jpg,ACB,ACTIVATED,Asia Commercial Joint Stock Bank,ACB,ACB,ACB
+2,Ngân hàng TMCP Tiên Phong,init/bank_logo/TPBANK.jpg,TPBANK,ACTIVATED,Tien Phong Commercial Joint Stock Bank,TPBank,TPBANK,TPBank
+3,Ngân hàng TMCP Đông Á,init/bank_logo/DAB.jpg,DAB,ACTIVATED,Dong A Commercial Joint Stock Bank,Đông Á Bank,DAB,"Đông Á Bank, DAB"
+4,Ngân Hàng TMCP Đông Nam Á,init/bank_logo/SEABANK.jpg,SEABANK,ACTIVATED,Southeast Asia Commercial Joint Stock Bank,SeABank,SEABANK,SeABank
+5,Ngân hàng TMCP An Bình,init/bank_logo/ABBANK.jpg,ABBANK,ACTIVATED,An Binh Commercial Joint Stock Bank,ABBANK,ABBANK,ABBANK
+6,Ngân hàng TMCP Bắc Á,init/bank_logo/BACABANK.jpg,BACABANK,ACTIVATED,Bac A Commercial Joint Stock Bank,BacABank,BACABANK,BacABank
+7,Ngân hàng TMCP Bản Việt,init/bank_logo/VIETCAPITALBANK.jpg,VIETCAPITALBANK,ACTIVATED,Vietcapital Commercial Joint Stock Bank,VietCapitalBank,VIETCAPITALBANK,VietCapitalBank
+8,Ngân hàng TMCP Hàng hải Việt Nam,init/bank_logo/MSB.jpg,MSB,ACTIVATED,Vietnam Maritime Joint – Stock Commercial Bank,MSB,MSB,MSB
+9,Ngân hàng TMCP Kỹ Thương Việt Nam,init/bank_logo/TCB.jpg,TCB,ACTIVATED,VietNam Technological and Commercial Joint Stock Bank,Techcombank,TCB,"Techcombank, TCB"
+12,Ngân hàng TMCP Quốc Dân,init/bank_logo/NCB.jpg,NCB,ACTIVATED,National Citizen Commercial Joint Stock Bank,National Citizen Bank,NCB,"National Citizen Bank, NCB"
+18,Ngân hàng TMCP Quốc tế Việt Nam,init/bank_logo/VIB.jpg,VIB,ACTIVATED,Vietnam International and Commercial Joint Stock Bank,VIBBank,VIB,"VIBBank, VIB"
+19,Ngân hàng TMCP Sài Gòn,init/bank_logo/SCB.jpg,SCB,ACTIVATED,Sai Gon Joint Stock Commercial Bank,Sài Gòn,SCB,"Sài Gòn, SCB"
+21,Ngân hàng TMCP Sài Gòn – Hà Nội,init/bank_logo/SHB.jpg,SHB,ACTIVATED,Saigon – Hanoi Commercial Joint Stock Bank,SHBank,SHB,"SHBank, SHB"
+22,Ngân hàng TMCP Sài Gòn Thương Tín,init/bank_logo/STB.jpg,STB,ACTIVATED,Sai Gon Thuong Tin Commercial Joint Stock Bank,Sacombank,STB,"Sacombank, STB"
+23,Ngân hàng TMCP Việt Á,init/bank_logo/VAB.jpg,VAB,ACTIVATED,Vietnam Asia Commercial Joint Stock Bank,VietABank,VAB,"VietABank, VAB"
+24,Ngân hàng TMCP Bảo Việt,init/bank_logo/BVB.jpg,BVB,ACTIVATED,Bao Viet Joint Stock Commercial Bank,BaoVietBank,BVB,"BaoVietBank, BVB"
+25,Ngân hàng TMCP Việt Nam Thương Tín,init/bank_logo/VIETBANK.jpg,VIETBANK,ACTIVATED,Vietnam Thuong Tin Commercial Joint Stock Bank,VietBank,VIETBANK,VietBank
+27,Ngân Hàng TMCP Xuất Nhập khẩu Việt Nam,init/bank_logo/EIB.jpg,EIB,ACTIVATED,Vietnam Joint Stock Commercia lVietnam Export Import Bank,Eximbank,EIB,"Eximbank, EIB"
+28,Ngân Hàng TMCP Bưu điện Liên Việt,init/bank_logo/LPB.jpg,LPB,ACTIVATED,Joint stock commercial Lien Viet postal bank,LienVietPostBank,LPB,"LienVietPostBank, LPB"
+29,Ngân Hàng TMCP Ngoại thương Việt Nam,init/bank_logo/VCB.jpg,VCB,ACTIVATED,JSC Bank for Foreign Trade of Vietnam,Vietcombank,VCB,"Vietcombank, VCB"
+30,Ngân Hàng TMCP Công Thương Việt Nam,init/bank_logo/CTG.jpg,CTG,ACTIVATED,Vietnam Joint Stock Commercial Bank for Industry and Trade,VietinBank,CTG,"VietinBank, CTG"
+31,Ngân Hàng TMCP Đầu tư và Phát triển Việt Nam,init/bank_logo/BIDV.jpg,BIDV,ACTIVATED,JSC Bank for Investment and Development of Vietnam,BIDV,BIDV,"BIDV, BID"
+32,Ngân hàng Chính sách xã hội,init/bank_logo/VBSP.jpg,VBSP,ACTIVATED,Vietnam Bank for Social Policies,NHCSXH/VBSP,VBSP,NHCSXH/VBSP
+14,Ngân hàng TMCP Phát triển Thành phố Hồ Chí Minh,init/bank_logo/HDBANK.png,HDBANK,ACTIVATED,Ho Chi Minh City Housing Development Bank,HDBank,HDBANK,HDBank
+10,Ngân hàng TMCP Kiên Long,init/bank_logo/KIENLONGBANK.png,KIENLONGBANK,ACTIVATED,Kien Long Commercial Joint Stock Bank,KienLongBank,KIENLONGBANK,KienLongBank
+16,Ngân hàng TMCP Quân đội,init/bank_logo/MB.png,MB,ACTIVATED,Military Commercial Joint Stock Bank,Military Bank,MB,"Military Bank, MB"
+11,Ngân hàng TMCP Nam Á,init/bank_logo/NAMABANK.png,NAMABANK,ACTIVATED,Nam A Comercial Join Stock Bank,Nam A Bank,NAMABANK,Nam A Bank
+15,Ngân hàng TMCP Phương Đông,init/bank_logo/OCB.png,OCB,ACTIVATED,Orient Commercial Joint Stock Bank,Orient Commercial Bank,OCB,"Orient Commercial Bank, OCB"
+26,Ngân Hàng TMCP Xăng Dầu Petrolimex,init/bank_logo/PGBANK.png,PGBANK,ACTIVATED,Joint Stock Commercia Petrolimex Bank,Petrolimex Group Bank,PGBANK,"Petrolimex Group Bank, PG Bank"
+17,Ngân hàng TMCP Đại chúng,init/bank_logo/PVCOMBANK.png,PVCOMBANK,ACTIVATED,Vietnam Public Joint Stock Commercial Bank,PVcombank,PVCOMBANK,PVcombank
+13,Ngân hàng TMCP Việt Nam Thịnh Vượng,init/bank_logo/VPBANK.png,VPBANK,ACTIVATED,Vietnam Prosperity Joint Stock Commercial Bank,VPBank,VPBANK,VPBank
+20,Ngân hàng TMCP Sài Gòn Công Thương,init/bank_logo/SGB.jpg,SGB,ACTIVATED,Saigon Bank for Industry and Trade,Saigonbank,SGB,"Saigonbank, SGB"
+34,Ngân hàng Thương mại TNHH MTV Xây dựng Việt Nam,init/bank_logo/CB.jpg,CB,ACTIVATED,Construction Bank,CB,CB,CB
+35,Ngân hàng Thương mại TNHH MTV Đại Dương,init/bank_logo/OCEANBANK.jpg,OCEANBANK,ACTIVATED,Ocean Commercial One Member Limited Liability Bank,Oceanbank,OCEANBANK,Oceanbank
+36,Ngân hàng Thương mại TNHH MTV Dầu Khí Toàn Cầu,init/bank_logo/GPBANK.jpg,GPBANK,ACTIVATED,Global Petro Commercial Joint Stock Bank,GPBank,GPBANK,GPBank
+37,Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam,init/bank_logo/AGRIBANK.jpg,AGRIBANK,ACTIVATED,Vietnam Bank for Agriculture and Rural Development,Agribank,AGRIBANK,Agribank
+33,Ngân hàng Phát triển Việt Nam,init/bank_logo/VDB.png,VDB,ACTIVATED,Vietnam Development Bank,VDB,VDB,VDB
