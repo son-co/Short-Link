@@ -27,7 +27,7 @@ yarn dev
 ```
 
 ### 5. **Access the website:**
-- Open your browser at: [http://localhost:3000](http://localhost:3000)
+- Open your browser at: [http://localhost:8039](http://localhost:8039)
 
 ---
 
