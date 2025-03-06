@@ -377,7 +377,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
     private void clickCount(String shortUrl) {
         // Tạo HttpClient
-        String api = "http://www.shrsms.com:8103/api/v1/consumer/public/click-count/"+shortUrl;
+        String api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl;
         HttpClient client = HttpClient.newHttpClient();
 
         // Tạo HttpRequest
