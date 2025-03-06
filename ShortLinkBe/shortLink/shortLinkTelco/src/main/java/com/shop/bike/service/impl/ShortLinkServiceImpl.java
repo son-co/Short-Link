@@ -77,7 +77,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
         try {
-            String apiUrl = "https://api.shrsms.com/api/short-link/v1/create";
+            String apiUrl = "http://localhost:8181/api/short-link/v1/create";
 
             // Prepare the request body
             JSONObject requestBody = new JSONObject();
