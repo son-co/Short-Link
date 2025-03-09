@@ -243,7 +243,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
         ShortLinkDO shortLinkDO = new ShortLinkDO();
         shortLinkDO.setDomain(requestParam.getDomain());
         shortLinkDO.setFullShortUrl(responseDTO.getData().getFullShortUrl());
-        shortLinkDO.setShortUri(responseDTO.getData().getFullShortUrl().replaceAll("https://api.shrsms.com/",""));
+        shortLinkDO.setShortUri(responseDTO.getData().getFullShortUrl().replaceAll("https://api2.shrsms.com/",""));
         shortLinkDO.setOriginUrl(requestParam.getOriginUrl());
         shortLinkDO.setClickNum(0);
         shortLinkDO.setGid(requestParam.getGid());
