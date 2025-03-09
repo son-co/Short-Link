@@ -36,6 +36,8 @@ public class WebConfigurer implements ServletContextInitializer {
 		log.info("Web application fully configured");
 	}
 	
+	
+	
 	@Bean
 	public CorsFilter corsFilter() {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -44,6 +46,7 @@ public class WebConfigurer implements ServletContextInitializer {
 		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
 		config.setAllowedHeaders(Arrays.asList("X-Requested-With", "Content-Type", "Authorization", "Origin", "Accept", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
 		config.setMaxAge(3600L); // 1 hour
+		config.setExposedHeaders(Arrays.asList("*"));
 		
 		source.registerCorsConfiguration("/api/**", config);
 		source.registerCorsConfiguration("/management/**", config);

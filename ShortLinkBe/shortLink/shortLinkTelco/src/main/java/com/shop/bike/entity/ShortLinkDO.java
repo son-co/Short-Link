@@ -18,7 +18,7 @@ import java.util.Date;
 @Table(name = "short_link")
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShortLinkDO {
+public class ShortLinkDO extends BaseEntity {
 
     /**
      * id

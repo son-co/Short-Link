@@ -21,7 +21,8 @@ public interface ShortLinkRepository extends JpaRepository<ShortLinkDO, Long> {
     
     @Query(value = " SELECT x.*   " +
             "            FROM telcosms_shortlink.short_link  x   " +
-            "            WHERE (:id IS NULL OR CAST(x.id AS CHAR) LIKE CONCAT('%', :id, '%'))   " +
+            "            WHERE  (:userId is null or x.created_by = :userId )" +
+            "              AND (:id IS NULL OR CAST(x.id AS CHAR) LIKE CONCAT('%', :id, '%'))   " +
             "              AND (:domain IS NULL OR x.t_domain LIKE CONCAT('%', :domain, '%'))   " +
             "              AND (:shortUri IS NULL OR x.short_uri  LIKE CONCAT('%', :shortUri, '%'))   " +
             "              AND (:fullShortUrl IS NULL OR x.full_short_url  LIKE CONCAT('%', :fullShortUrl, '%'))   " +
@@ -35,6 +36,7 @@ public interface ShortLinkRepository extends JpaRepository<ShortLinkDO, Long> {
                                         @Param("originUrl") String originUrl,
                                         @Param("fromDate") Instant fromDate,
                                         @Param("toDate") Instant toDate,
+                                        @Param("userId") String userId,
                                         Pageable pageable);
     
     @Query(value = "SELECT count(*) " +

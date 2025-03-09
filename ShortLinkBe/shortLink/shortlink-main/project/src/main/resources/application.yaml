@@ -23,7 +23,7 @@ spring:
     redis:
       host: localhost
       port: 6379
-#      password: Test_930910
+      password: Test_930910
     
   mvc:
     view:
@@ -36,8 +36,8 @@ spring:
 
 short-link:
   domain:
-#    default: api.shrsms.com
-    default: localhost:8101
+    default: api.shrsms.com
+#    default: localhost:8101
   stats:
     locale:
       amap-key: 824c511f0997586ea016f979fdb23087

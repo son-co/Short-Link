@@ -12,7 +12,7 @@ import java.util.Map;
 
 public interface ClickCountService {
 
-	ClickCount saveClickCount(String shortUrl, HttpServletRequest request);
+	ClickCount saveClickCount(String shortUrl, String clientId);
 	
 	Page<ClickCount> findAllClickCount(ClickCountFilterDTO filterDTO, Pageable pageable);
 	

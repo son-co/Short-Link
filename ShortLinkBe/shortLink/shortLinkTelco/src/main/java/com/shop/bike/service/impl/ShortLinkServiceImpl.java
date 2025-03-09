@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.shop.bike.entity.ShortLinkDO;
 import com.shop.bike.repository.ClickCountRepository;
 import com.shop.bike.repository.ShortLinkRepository;
+import com.shop.bike.security.SecurityUtils;
 import com.shop.bike.service.ShortLinkFilterDTO;
 import com.shop.bike.service.ShortLinkService;
 import com.shop.bike.service.feign.dto.ShortLinkCreateReqDTO;
@@ -77,7 +78,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
         try {
-            String apiUrl = "http://localhost:8181/api/short-link/v1/create";
+            String apiUrl = "http://localhost:8101/api/short-link/v1/create";
 
             // Prepare the request body
             JSONObject requestBody = new JSONObject();
@@ -198,7 +199,8 @@ public class ShortLinkServiceImpl implements ShortLinkService {
     public Page<ShortLinkVM> findAllShortLink(ShortLinkFilterDTO filterDTO, Pageable pageable) {
         return shortLinkRepository.findAllWithFilter(filterDTO.getId(),
                 filterDTO.getDomain(), filterDTO.getShortUri(), filterDTO.getFullShortUrl(),
-                filterDTO.getOriginUrl(), filterDTO.getValidDateFrom(), filterDTO.getValidDateTo(), pageable)
+                filterDTO.getOriginUrl(), filterDTO.getValidDateFrom(), filterDTO.getValidDateTo(),
+                        SecurityUtils.getCurrentUserLogin().get(),pageable)
                 .map(shortLinkDO -> {
                     ShortLinkVM vm = vmMapper.toDto(shortLinkDO);
                     vm.setTotalClick(clickCountRepository.getTotalClick(vm.getShortUri()));

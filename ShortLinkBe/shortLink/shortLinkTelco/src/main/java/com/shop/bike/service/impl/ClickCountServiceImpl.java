@@ -50,14 +50,15 @@ public class ClickCountServiceImpl implements ClickCountService {
 
 
 	@Override
-	public ClickCount saveClickCount(String shortUrl, HttpServletRequest request) {
+	public ClickCount saveClickCount(String shortUrl, String clientIp) {
 		ShortLinkDO shortLinkDO = shortLinkRepository.findByShortUri(shortUrl);
 		ClickCount clickCount = new ClickCount();
 		if(shortLinkDO!=null) {
 			clickCount.setDomain(shortLinkDO.getFullShortUrl());
 			clickCount.setOriginUrl(shortLinkDO.getOriginUrl());
 		}
-		clickCount.setIpAddress(getClientIp(request));
+		System.out.println("client id: "+ clientIp);
+		clickCount.setIpAddress(clientIp);
 		clickCount.setShortUrl(shortUrl);
 		return clickCountRepository.save(clickCount);
 		
@@ -74,18 +75,5 @@ public class ClickCountServiceImpl implements ClickCountService {
 	public List<StatisticPojo> statistic(String fromDate, String toDate) {
 		return clickCountRepository.statisticClick(fromDate, toDate);
 	}
-
-	public String getClientIp(HttpServletRequest request) {
-		String ip = request.getHeader("X-Forwarded-For");
-		if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("Proxy-Client-IP");
-		}
-		if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("WL-Proxy-Client-IP");
-		}
-		if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getRemoteAddr();
-		}
-		return ip;
-	}
+	
 }

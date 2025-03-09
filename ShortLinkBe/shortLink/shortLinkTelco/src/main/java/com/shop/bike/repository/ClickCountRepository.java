@@ -21,7 +21,7 @@ public interface ClickCountRepository extends JpaRepository<ClickCount, Long> {
 
     @Query(value = "SELECT x.* " +
             "FROM telcosms_shortlink.click_count x " +
-            "WHERE (:id IS NULL OR CAST(x.id AS CHAR) LIKE CONCAT('%', :id, '%')) " +
+            "WHERE x.origin_url is not null and (:id IS NULL OR CAST(x.id AS CHAR) LIKE CONCAT('%', :id, '%')) " +
             "  AND (:domain IS NULL OR x.t_domain LIKE CONCAT('%', :domain, '%')) " +
             "  AND (:ipAddress IS NULL OR x.ip_address LIKE CONCAT('%', :ipAddress, '%')) " +
             "  AND (:shortUrl IS NULL OR x.short_url LIKE CONCAT('%', :shortUrl, '%')) " +
@@ -42,7 +42,7 @@ public interface ClickCountRepository extends JpaRepository<ClickCount, Long> {
             "    COUNT(x.id) AS totalClick,  " +
             "    DATE(x.created_date) AS date   " +
             "FROM telcosms_shortlink.click_count x " +
-            "WHERE  " +
+            "WHERE x.origin_url is not null and " +
             "(:fromDate is null or (x.created_date >= :fromDate)) " +
             "and (:toDate is null or (x.created_date <= :toDate)) " +
             "GROUP BY DATE(x.created_date); ", nativeQuery = true)

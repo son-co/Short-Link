@@ -375,9 +375,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         return BeanUtil.copyToList(shortLinkDOList, ShortLinkGroupCountQueryRespDTO.class);
     }
 
-    private void clickCount(String shortUrl) {
+    private void clickCount(String shortUrl, String clientId) {
         // Tạo HttpClient
-        String api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl;
+        String api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientId;
         HttpClient client = HttpClient.newHttpClient();
 
         // Tạo HttpRequest
@@ -399,10 +399,25 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             e.printStackTrace();
         }
     }
+
+    public String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        System.out.println("client ip: "+ ip);
+        return ip;
+    }
     @SneakyThrows
     @Override
-    public void restoreUrl(String shortUri, ServletRequest request, ServletResponse response) {
-        clickCount(shortUri);
+    public void restoreUrl(String shortUri, ServletRequest request, ServletResponse response, HttpServletRequest requests) {
+        clickCount(shortUri, getClientIp(requests));
         // 短链接接口的并发量有多少？如何测试？详情查看：https://nageoffer.com/shortlink/question
         // 面试中如何回答短链接是如何跳转长链接？详情查看：https://nageoffer.com/shortlink/question
         System.out.println("this is method to call shortLink");
