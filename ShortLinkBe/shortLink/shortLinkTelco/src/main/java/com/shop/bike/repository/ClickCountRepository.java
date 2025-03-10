@@ -49,7 +49,7 @@ public interface ClickCountRepository extends JpaRepository<ClickCount, Long> {
     List<StatisticPojo> statisticClick(@Param("fromDate") String fromDate,
                                        @Param("toDate") String toDate);
     
-    @Query(value = "SELECT count(*) from click_count cc where cc.short_url =:shortUrl", nativeQuery = true)
+    @Query(value = "SELECT count(DISTINCT(cc.ip_address)) from click_count cc where cc.short_url =:shortUrl", nativeQuery = true)
     Integer getTotalClick(@Param("shortUrl")String shortUrl);
 
 }
