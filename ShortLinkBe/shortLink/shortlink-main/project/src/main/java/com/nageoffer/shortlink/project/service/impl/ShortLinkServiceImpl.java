@@ -375,9 +375,13 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         return BeanUtil.copyToList(shortLinkDOList, ShortLinkGroupCountQueryRespDTO.class);
     }
 
-    private void clickCount(String shortUrl, String clientId) {
+    private void clickCount(String shortUrl,String p, String clientId) {
+        String api;
+        if(p!=null)
         // Tạo HttpClient
-        String api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientId;
+            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientId+"?p="+p;
+        else
+            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientId; 
         HttpClient client = HttpClient.newHttpClient();
 
         // Tạo HttpRequest
@@ -416,8 +420,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     }
     @SneakyThrows
     @Override
-    public void restoreUrl(String shortUri, ServletRequest request, ServletResponse response, HttpServletRequest requests) {
-        clickCount(shortUri, getClientIp(requests));
+    public void restoreUrl(String shortUri,String p, ServletRequest request, ServletResponse response, HttpServletRequest requests) {
+        clickCount(shortUri,p, getClientIp(requests));
         // 短链接接口的并发量有多少？如何测试？详情查看：https://nageoffer.com/shortlink/question
         // 面试中如何回答短链接是如何跳转长链接？详情查看：https://nageoffer.com/shortlink/question
         System.out.println("this is method to call shortLink");

@@ -95,7 +95,7 @@ public interface ShortLinkService extends IService<ShortLinkDO> {
      * @param request  HTTP 请求
      * @param response HTTP 响应
      */
-    void restoreUrl(String shortUri, ServletRequest request, ServletResponse response, HttpServletRequest requests);
+    void restoreUrl(String shortUri,String p, ServletRequest request, ServletResponse response, HttpServletRequest requests);
 
     /**
      * 短链接统计

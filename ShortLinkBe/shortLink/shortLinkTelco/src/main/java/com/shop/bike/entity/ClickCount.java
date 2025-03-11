@@ -40,4 +40,7 @@ public class ClickCount {
 	@Column(name = "created_date", updatable = false)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
 	private Instant createdDate = Instant.now();
+	
+	@Column(name = "short_link_extra")
+	private String shortLinkExtra;
 }

@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.List;
@@ -48,9 +49,14 @@ public class ClickCountServiceImpl implements ClickCountService {
 	@Autowired
 	private ShortLinkRepository shortLinkRepository;
 
+	private static final String BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	private static final int BASE = 62;
+	private static final int FIXED_LENGTH = 8; // Fixed output length
+
+
 
 	@Override
-	public ClickCount saveClickCount(String shortUrl, String clientIp) {
+	public ClickCount saveClickCount(String shortUrl, String clientIp, String p) {
 		ShortLinkDO shortLinkDO = shortLinkRepository.findByShortUri(shortUrl);
 		ClickCount clickCount = new ClickCount();
 		if(shortLinkDO!=null) {
@@ -60,6 +66,10 @@ public class ClickCountServiceImpl implements ClickCountService {
 		System.out.println("client id: "+ clientIp);
 		clickCount.setIpAddress(clientIp);
 		clickCount.setShortUrl(shortUrl);
+		if(p!=null) {
+			System.out.println("p is:");
+			clickCount.setShortLinkExtra(decodePhone(p));
+		}
 		return clickCountRepository.save(clickCount);
 		
 	}
@@ -75,5 +85,44 @@ public class ClickCountServiceImpl implements ClickCountService {
 	public List<StatisticPojo> statistic(String fromDate, String toDate) {
 		return clickCountRepository.statisticClick(fromDate, toDate);
 	}
-	
+
+	public static String encodePhone(String phoneNumber) {
+		BigInteger num = new BigInteger(phoneNumber);
+		StringBuilder encoded = new StringBuilder();
+
+		while (num.compareTo(BigInteger.ZERO) > 0) {
+			encoded.insert(0, BASE62.charAt(num.mod(BigInteger.valueOf(BASE)).intValue()));
+			num = num.divide(BigInteger.valueOf(BASE));
+		}
+
+		// Pad to ensure 8 characters
+		while (encoded.length() < FIXED_LENGTH) {
+			encoded.insert(0, "0");
+		}
+
+		return encoded.toString();
+	}
+
+	// 2️⃣ Decoding: 8-character string -> Original phone number
+	public static String decodePhone(String encoded) {
+		BigInteger num = BigInteger.ZERO;
+
+		for (char c : encoded.toCharArray()) {
+			num = num.multiply(BigInteger.valueOf(BASE)).add(BigInteger.valueOf(BASE62.indexOf(c)));
+		}
+
+		return num.toString();
+	}
+
+	public static void main(String[] args) {
+		String phoneNumber = "639163003715"; // Philippine phone number
+		String encoded = encodePhone(phoneNumber);
+		String decoded = decodePhone(encoded);
+
+		System.out.println("Original Phone Number: " + phoneNumber);
+		System.out.println("Encoded: " + encoded);
+		System.out.println("Decoded: " + decoded);
+		System.out.println("Match: " + phoneNumber.equals(decoded));
+	}
+
 }

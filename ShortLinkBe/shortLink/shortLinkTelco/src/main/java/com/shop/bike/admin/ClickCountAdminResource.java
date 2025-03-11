@@ -30,8 +30,12 @@ public class ClickCountAdminResource {
 
 
     @GetMapping("/click-count/{shortUrl}/{clientIp}")
-    public ResponseEntity<ClickCount> createShortLink(@PathVariable("shortUrl") String shortUrl,@PathVariable("clientIp") String clientIp) {
-        return ResponseEntity.ok(service.saveClickCount(shortUrl, clientIp));
+    public ResponseEntity<ClickCount> createShortLink(@PathVariable("shortUrl") String shortUrl,
+                                                      @PathVariable("clientIp") String clientIp,
+                                                      String p) {
+        return ResponseEntity.ok(service.saveClickCount(shortUrl, clientIp,p));
     }
+    
+    
 
 }
