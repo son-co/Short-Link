@@ -239,7 +239,8 @@ const LinksPage = () => {
                           fontSize: 13,
                         }}
                       >
-                        <CalendarFilled /> {moment(it?.validDate).format('MMM DD, YYYY')}
+                        <CalendarFilled />{' '}{moment(it?.validDate).format('YYYY-MM-DD HH:mm:ss')}
+
                       </Typography>
 
                       {/* <Typography
