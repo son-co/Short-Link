@@ -103,7 +103,7 @@ const ViewLinks = (props) => {
                 }}
               >
                 <CalendarFilled />{' '}
-                {moment(props?.getShortLinkDetail?.validDate).format('MMM DD, YYYY')}
+                {moment(props?.getShortLinkDetail?.validDate).format('YYYY-MM-DD HH:mm:ss')}
               </Typography>
             </Box>
           </Box>
