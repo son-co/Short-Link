@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 
 function ChartStatistic(props) {
   const calculateChartWidth = (dataLength) => {
-    const minWidth = 700;
+    const minWidth = 950;
     const maxWidthPerData = 50;
     return Math.max(minWidth, dataLength * maxWidthPerData);
   };

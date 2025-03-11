@@ -7,12 +7,15 @@ import {
   SettingOutlined,
   CloseOutlined,
   MenuOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Layout, Menu, Image } from 'antd';
+import { Layout, Menu, Image, Button, message } from 'antd';
 import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import * as PATH from '@/routes/routesConfig';
+import store from '@/state/store';
+import { authActions } from '@/state/ducks/authUser';
 
 const { Header, Content, Sider } = Layout;
 
@@ -145,16 +148,27 @@ const MainLayout: React.FC<LayoutProps> = ({ children }) => {
         >
           {/* Header */}
           <Header
-            className="fixed top-0 left-0 right-0 bg-[#28413e] z-40 px-4 flex items-center justify-between"
+            className={`fixed top-0 left-0 right-0 bg-[#f8fafd] z-40 px-4 flex items-center justify-between md:justify-end ${
+              isMobileMenuOpen ? '' : collapsed ? 'md:pl-[80px]' : 'md:pl-[200px]'
+            }`}
             style={{ height: 64 }}
           >
             {/* Menu Button for Mobile */}
             <MenuOutlined
-              className="text-white text-2xl cursor-pointer md:hidden"
+              className="text-[#4e556d] text-2xl cursor-pointer md:hidden"
               onClick={() => setMobileMenuOpen(true)}
             />
 
-            <Typography className="text-white text-lg md:ml-4">Header</Typography>
+            <Button
+              type="text"
+              className="text-white text-lg md:ml-4 hover:!text-white"
+              onClick={() => {
+                store.dispatch(authActions.logout());
+                message.success(`Logout successfully!`);
+              }}
+            >
+              <LogoutOutlined /> Logout
+            </Button>
           </Header>
 
           {/* Content */}

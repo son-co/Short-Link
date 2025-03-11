@@ -42,7 +42,7 @@ const LinksPage = () => {
       .then((response) => {
         if (response.status === 401) {
           // Xử lý lỗi 401 Unauthorized
-          navigate(PATH.DASHBOARD_PATH);
+          navigate(PATH.LOGIN_PATH);
           throw new Error('Unauthorized: Please check your token or login again.');
         }
         if (!response.ok) {
@@ -239,8 +239,7 @@ const LinksPage = () => {
                           fontSize: 13,
                         }}
                       >
-                        <CalendarFilled />{' '}{moment(it?.validDate).format('YYYY-MM-DD HH:mm:ss')}
-
+                        <CalendarFilled /> {moment(it?.validDate).format('YYYY-MM-DD HH:mm:ss')}
                       </Typography>
 
                       {/* <Typography

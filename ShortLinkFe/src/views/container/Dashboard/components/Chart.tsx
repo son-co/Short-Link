@@ -5,7 +5,7 @@ import { Box } from '@mui/material';
 
 const DoubleAxes = (props) => {
   const calculateChartWidth = (dataLength) => {
-    const minWidth = 1100;
+    const minWidth = 1300;
     const maxWidthPerData = 50;
     return Math.max(minWidth, dataLength * maxWidthPerData);
   };
