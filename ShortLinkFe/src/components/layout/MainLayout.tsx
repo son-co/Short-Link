@@ -12,7 +12,7 @@ import {
 import type { MenuProps } from 'antd';
 import { Layout, Menu, Image, Button, message } from 'antd';
 import { Box, Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import * as PATH from '@/routes/routesConfig';
 import store from '@/state/store';
 import { authActions } from '@/state/ducks/authUser';
@@ -68,6 +68,7 @@ const selectedMenus = () => {
 const MainLayout: React.FC<LayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -165,6 +166,7 @@ const MainLayout: React.FC<LayoutProps> = ({ children }) => {
               onClick={() => {
                 store.dispatch(authActions.logout());
                 message.success(`Logout successfully!`);
+                navigate(PATH.LOGIN_PATH);
               }}
             >
               <LogoutOutlined /> Logout
