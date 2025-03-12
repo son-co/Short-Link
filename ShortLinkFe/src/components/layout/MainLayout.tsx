@@ -149,7 +149,7 @@ const MainLayout: React.FC<LayoutProps> = ({ children }) => {
         >
           {/* Header */}
           <Header
-            className={`fixed top-0 left-0 right-0 bg-[#f8fafd] z-40 px-4 flex items-center justify-between md:justify-end ${
+            className={`fixed top-0 left-0 right-0 bg-[#28413e] z-40 px-4 flex items-center justify-between md:justify-end ${
               isMobileMenuOpen ? '' : collapsed ? 'md:pl-[80px]' : 'md:pl-[200px]'
             }`}
             style={{ height: 64 }}
