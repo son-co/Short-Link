@@ -19,5 +19,9 @@ public interface ShortLinkService {
 	Page<ShortLinkVM> findAllShortLink(ShortLinkFilterDTO filterDTO, Pageable pageable);
 	
 	StatisticOverview getOverview();
+	
+	void updateIsAccess(Boolean isAccess, String uri);
+
+	Boolean getIsAccess(String uri);
 
 }

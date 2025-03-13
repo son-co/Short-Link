@@ -34,4 +34,10 @@ public class ShortLinkVM {
     private String favicon;
     
     private Integer totalClick;
+
+    private String titleUserCreated;
+    
+    private Long groupId;
+    
+    private Boolean isAccess;
 }

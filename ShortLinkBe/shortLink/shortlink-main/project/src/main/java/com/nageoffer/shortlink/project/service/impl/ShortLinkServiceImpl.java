@@ -375,6 +375,28 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         return BeanUtil.copyToList(shortLinkDOList, ShortLinkGroupCountQueryRespDTO.class);
     }
 
+    public boolean getState(String shortUrl) {
+        try {
+            System.out.println("test success");
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8103/api/v1/admin/public/get-state/"+ shortUrl))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                return Boolean.parseBoolean(response.body().trim());
+            } else {
+                System.out.println("Request failed with status code: " + response.statusCode());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false; // Trả về false nếu có lỗi
+    }
+
     private void clickCount(String shortUrl,String p, String clientId) {
         String api;
         if(p!=null)
@@ -389,7 +411,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .uri(URI.create(api)) // Đường dẫn API
                 .GET()                    // Phương thức GET
                 .build();
-
         try {
             // Gửi yêu cầu và nhận phản hồi
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -421,9 +442,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @SneakyThrows
     @Override
     public void restoreUrl(String shortUri,String p, ServletRequest request, ServletResponse response, HttpServletRequest requests) {
+        if(!getState(shortUri)) {
+            throw new RuntimeException("Your Link was unactivated");
+        }
         clickCount(shortUri,p, getClientIp(requests));
-        // 短链接接口的并发量有多少？如何测试？详情查看：https://nageoffer.com/shortlink/question
-        // 面试中如何回答短链接是如何跳转长链接？详情查看：https://nageoffer.com/shortlink/question
         System.out.println("this is method to call shortLink");
         String serverName = request.getServerName();
         String serverPort = Optional.of(request.getServerPort())

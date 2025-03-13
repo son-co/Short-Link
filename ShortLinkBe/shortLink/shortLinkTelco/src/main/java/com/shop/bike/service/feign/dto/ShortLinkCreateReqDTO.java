@@ -64,4 +64,8 @@ public class ShortLinkCreateReqDTO {
      * 描述
      */
     private String describe;
+
+    private String titleUserCreated;
+    
+    private Long groupId;
 }

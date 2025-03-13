@@ -25,10 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
@@ -60,5 +57,17 @@ public class ShortLinkAdminResource {
     public ResponseEntity<StatisticOverview> getStatistic() {
         log.debug("get statistic overview");
         return ResponseEntity.ok(service.getOverview());
+    }
+    
+    @PutMapping("/update-state-short-url/{isAccess}/{shortUri}")
+    public ResponseEntity<Void> updateState(@PathVariable("isAccess") Boolean isAccess,
+                                            @PathVariable("shortUri") String shortUri) {
+        service.updateIsAccess(isAccess, shortUri);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/public/get-state/{shortUri}")
+    public ResponseEntity<Boolean> getIsAccess(@PathVariable("shortUri") String shortUri) {
+        return ResponseEntity.ok(service.getIsAccess(shortUri));
     }
 }

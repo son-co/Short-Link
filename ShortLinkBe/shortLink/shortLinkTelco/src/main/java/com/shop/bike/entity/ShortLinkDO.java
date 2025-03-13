@@ -127,4 +127,13 @@ public class ShortLinkDO extends BaseEntity {
     
     @Column(name = "title")
     private String title;
+    
+    @Column(name = "title_user_created")
+    private String titleUserCreated;
+    
+    @Column(name = "is_access")
+    private Boolean isAccess = true;
+    
+    @Column(name = "group_id")
+    private Long groupId;
 }

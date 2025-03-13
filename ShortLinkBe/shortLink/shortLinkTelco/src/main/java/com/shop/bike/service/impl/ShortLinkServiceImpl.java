@@ -109,6 +109,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
             responseDTO.setTitle(title);
             responseDTO.setFavicon(favicon);
             responseDTO.setValidDate(requestParam.getValidDate());
+            responseDTO.setGroupId(requestParam.getGroupId());
             return responseDTO;
 
         } catch (Exception e) {
@@ -197,10 +198,11 @@ public class ShortLinkServiceImpl implements ShortLinkService {
 
     @Override
     public Page<ShortLinkVM> findAllShortLink(ShortLinkFilterDTO filterDTO, Pageable pageable) {
-        return shortLinkRepository.findAllWithFilter(filterDTO.getId(),
+        return shortLinkRepository.findAllWithFilter(filterDTO.getId(), filterDTO.getGroupId(),
                 filterDTO.getDomain(), filterDTO.getShortUri(), filterDTO.getFullShortUrl(),
                 filterDTO.getOriginUrl(), filterDTO.getValidDateFrom(), filterDTO.getValidDateTo(),
-                        SecurityUtils.getCurrentUserLogin().get(),pageable)
+                        SecurityUtils.getCurrentUserLogin().get(),filterDTO.getTitle(), filterDTO.getTitleUserCreated(),
+                        pageable)
                 .map(shortLinkDO -> {
                     ShortLinkVM vm = vmMapper.toDto(shortLinkDO);
                     vm.setTotalClick(clickCountRepository.getTotalClick(vm.getShortUri()));
@@ -238,6 +240,23 @@ public class ShortLinkServiceImpl implements ShortLinkService {
         return statisticOverview;
     }
 
+    @Override
+    public void updateIsAccess(Boolean isAccess, String uri) {
+        ShortLinkDO shortLinkDO = shortLinkRepository.findByShortUri(uri);
+        shortLinkDO.setIsAccess(isAccess);
+        shortLinkRepository.save(shortLinkDO);
+    }
+
+    @Override
+    public Boolean getIsAccess(String uri) {
+        ShortLinkDO shortLinkDO = shortLinkRepository.findByShortUri(uri);
+        System.out.println("short link: "+ JsonConverter.toJson(shortLinkDO));
+        if(shortLinkDO.getIsAccess()!=null)
+            return shortLinkDO.getIsAccess();
+        else 
+            return false;
+    }
+
 
     private void saveShortLink(ShortLinkCreateReqDTO requestParam, ShortLinkCreateRespDTO responseDTO, String title, String favicon) {
         ShortLinkDO shortLinkDO = new ShortLinkDO();
@@ -258,6 +277,8 @@ public class ShortLinkServiceImpl implements ShortLinkService {
         shortLinkDO.setTotalUip(0);
         shortLinkDO.setDelTime(0L);
         shortLinkDO.setTitle(title);
+        shortLinkDO.setTitleUserCreated(requestParam.getTitleUserCreated());
+        shortLinkDO.setGroupId(requestParam.getGroupId());
         shortLinkRepository.save(shortLinkDO);
     }
 

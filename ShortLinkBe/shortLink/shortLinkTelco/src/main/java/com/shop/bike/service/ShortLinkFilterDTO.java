@@ -30,4 +30,10 @@ public class ShortLinkFilterDTO {
     private Instant validDateTo;
 
     private String describe;
+    
+    private String title;
+    
+    private String titleUserCreated;
+    
+    private Long groupId;
 }
