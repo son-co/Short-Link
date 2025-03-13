@@ -33,7 +33,7 @@ const AuthPage = (props) => {
       }
 
       message.success('Login Successfully');
-      navigate(PATH.LINKS_PAGE);
+      navigate(PATH.HOME_PATH);
     } catch (error: any) {
       console.log('son', error);
 

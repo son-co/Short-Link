@@ -83,10 +83,6 @@ const DashboardPage = () => {
     callApi(`${API_URL}/api/v1/admin/overview/statistic`, {}, 'GET', setListDataStatistic);
   }, [filterDate]);
 
-  useEffect(() => {
-    console.log('son', listDataStatistic);
-  }, [listDataStatistic]);
-
   const callApi2 = (url = '', data) => {
     fetch(url, {
       method: 'POST', // Phương thức HTTP là POST

@@ -8,11 +8,12 @@ import {
   CloseOutlined,
   MenuOutlined,
   LogoutOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Layout, Menu, Image, Button, message } from 'antd';
 import { Box, Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import * as PATH from '@/routes/routesConfig';
 import store from '@/state/store';
 import { authActions } from '@/state/ducks/authUser';
@@ -43,9 +44,9 @@ function getItem(
 const items: MenuItem[] = [
   getItem(<Link to={PATH.HOME_PATH}>Home</Link>, '1', <DashboardOutlined />),
   getItem(<Link to={PATH.LINKS_PAGE}>Links</Link>, '2', <LinkOutlined />),
-  // getItem('Qr Codes', '3', <QrcodeOutlined />),
-  getItem(<Link to={PATH.ANALYTICS_PAGE}>Analytics</Link>, '3', <PieChartOutlined />),
-  getItem('Settings', '4', <SettingOutlined />),
+  getItem(<Link to={PATH.GROUPS_PATH}>Groups</Link>, '3', <AppstoreOutlined />),
+  getItem(<Link to={PATH.ANALYTICS_PAGE}>Analytics</Link>, '4', <PieChartOutlined />),
+  getItem('Settings', '5', <SettingOutlined />),
 ];
 
 const selectedMenus = () => {
@@ -56,6 +57,8 @@ const selectedMenus = () => {
     case PATH.ADD_LINKS_PAGE:
     case PATH.VIEW_LINKS_PAGE:
       return '2';
+    case PATH.GROUPS_PATH:
+      return '3';
     case PATH.ANALYTICS_PAGE:
       return '4';
     // case PATH.ADMIN_PRODUCTS_PATH:
@@ -68,6 +71,7 @@ const selectedMenus = () => {
 const MainLayout: React.FC<LayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -148,14 +152,14 @@ const MainLayout: React.FC<LayoutProps> = ({ children }) => {
         >
           {/* Header */}
           <Header
-            className={`fixed top-0 left-0 right-0 bg-[#f8fafd] z-40 px-4 flex items-center justify-between md:justify-end ${
+            className={`fixed top-0 left-0 right-0 bg-[#28413e] z-40 px-4 flex items-center justify-between md:justify-end ${
               isMobileMenuOpen ? '' : collapsed ? 'md:pl-[80px]' : 'md:pl-[200px]'
             }`}
             style={{ height: 64 }}
           >
             {/* Menu Button for Mobile */}
             <MenuOutlined
-              className="text-[#4e556d] text-2xl cursor-pointer md:hidden"
+              className="text-white text-2xl cursor-pointer md:hidden"
               onClick={() => setMobileMenuOpen(true)}
             />
 

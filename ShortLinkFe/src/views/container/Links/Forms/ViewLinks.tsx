@@ -43,11 +43,28 @@ const ViewLinks = (props) => {
           </Box>
           <Box className="w-full">
             <Box className="flex items-center justify-between w-full">
+              <Link to={props?.shortUrl} target="_blank" className="w-full">
+                <Typography
+                  sx={{
+                    fontFamily: 'Nunito',
+                    fontSize: 18,
+                    fontWeight: 700,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    color: '#89de2b',
+                  }}
+                >
+                  {props?.getShortLinkDetail?.titleUserCreated || 'Title'}
+                </Typography>
+              </Link>
+            </Box>
+            <Box className="flex items-center justify-between w-full">
               <Link to={props?.shortUrl} target="_blank">
                 <Typography
                   sx={{
                     fontFamily: 'Nunito',
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 700,
                   }}
                 >

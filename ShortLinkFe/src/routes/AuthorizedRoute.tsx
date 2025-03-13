@@ -12,7 +12,7 @@ interface AuthorizedRouteProps {
 
 const AuthorizedRoute: React.FC<AuthorizedRouteProps> = ({ children, path, isAuthenticated }) => {
   // Điều hướng dựa trên trạng thái xác thực
-  if (isAuthenticated && (path === LOGIN_PATH || path === REGISTER_PATH)) {
+  if (isAuthenticated && path === LOGIN_PATH) {
     return <Navigate to={DASHBOARD_PATH} replace />;
   }
 

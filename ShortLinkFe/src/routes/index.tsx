@@ -7,6 +7,8 @@ import AddLinks from '@/views/container/Links/Forms/AddLinks';
 import ViewLinks from '@/views/container/Links/Forms/ViewLinks';
 import AnalyticsPage from '@/views/container/Analytics';
 import DashboardPage from '@/views/container/Dashboard';
+import AuthorizedRoute from './AuthorizedRoute';
+import GroupsPage from '@/views/container/Groups';
 
 const AppRoutes = () => {
   const location = useLocation(); // Lấy thông tin URL hiện tại
@@ -23,11 +25,55 @@ const AppRoutes = () => {
       <Route path={PATH.LOGIN_PATH} element={<AuthPage />} />
 
       <Route path={PATH.DASHBOARD_PATH} element={<HomePage />} />
-      <Route path={PATH.LINKS_PAGE} element={<LinksPage />} />
-      <Route path={PATH.ADD_LINKS_PAGE} element={<AddLinks />} />
-      <Route path={PATH.VIEW_LINKS_PAGE} element={<ViewLinks />} />
-      <Route path={PATH.ANALYTICS_PAGE} element={<AnalyticsPage />} />
-      <Route path={PATH.HOME_PATH} element={<DashboardPage />} />
+      <Route
+        path={PATH.LINKS_PAGE}
+        element={
+          <AuthorizedRoute path={PATH.LINKS_PAGE}>
+            <LinksPage />
+          </AuthorizedRoute>
+        }
+      />
+      <Route
+        path={PATH.ADD_LINKS_PAGE}
+        element={
+          <AuthorizedRoute path={PATH.ADD_LINKS_PAGE}>
+            <AddLinks />
+          </AuthorizedRoute>
+        }
+      />
+      <Route
+        path={PATH.VIEW_LINKS_PAGE}
+        element={
+          <AuthorizedRoute path={PATH.VIEW_LINKS_PAGE}>
+            <ViewLinks />
+          </AuthorizedRoute>
+        }
+      />
+      <Route
+        path={PATH.ANALYTICS_PAGE}
+        element={
+          <AuthorizedRoute path={PATH.ANALYTICS_PAGE}>
+            <AnalyticsPage />
+          </AuthorizedRoute>
+        }
+      />
+      <Route
+        path={PATH.HOME_PATH}
+        element={
+          <AuthorizedRoute path={PATH.HOME_PATH}>
+            <DashboardPage />
+          </AuthorizedRoute>
+        }
+      />
+
+      <Route
+        path={PATH.GROUPS_PATH}
+        element={
+          <AuthorizedRoute path={PATH.GROUPS_PATH}>
+            <GroupsPage />
+          </AuthorizedRoute>
+        }
+      />
     </Routes>
   );
 };

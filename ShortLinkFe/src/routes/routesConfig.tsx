@@ -7,6 +7,7 @@ export const ADD_LINKS_PAGE = '/links/new';
 export const VIEW_LINKS_PAGE = '/links/view';
 export const ANALYTICS_PAGE = '/analytics';
 export const HOME_PATH = '/home';
+export const GROUPS_PATH = '/groups';
 
 export const DATA_PATH = [
   LOGIN_PATH,
@@ -18,4 +19,5 @@ export const DATA_PATH = [
   VIEW_LINKS_PAGE,
   ANALYTICS_PAGE,
   HOME_PATH,
+  GROUPS_PATH,
 ];

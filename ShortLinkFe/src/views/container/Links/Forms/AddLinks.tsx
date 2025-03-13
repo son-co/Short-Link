@@ -1,13 +1,14 @@
 import { API_URL, JWT } from '@/configs';
 import { getCookie } from '@/state/utils/session';
 import { Box, Typography } from '@mui/material';
-import { Button, Card, Col, Form, Input, message, Row } from 'antd';
+import { Button, Card, Col, Form, Input, message, Row, Select } from 'antd';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as PATH from '@/routes/routesConfig';
 import { useDispatch } from 'react-redux';
 import { SET_DATA_URL_DETAIL } from '@/state/ducks/appData/types';
+import fetchApi from '../../Groups/fetch';
 
 const AddLinks = () => {
   const [form] = Form.useForm();
@@ -17,6 +18,7 @@ const AddLinks = () => {
   const [isClose, setIsClose] = useState(false);
   const token = getCookie(JWT);
   const dispatch = useDispatch();
+  const [groupData, setGroupData] = useState<any>([]);
 
   const callApi = (url = '', data) => {
     fetch(url, {
@@ -56,6 +58,19 @@ const AddLinks = () => {
       });
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await fetchApi({
+        url: `${API_URL}/api/v1/admin/group-link/get-list`,
+        method: 'GET',
+        isToken: true,
+      });
+      setGroupData(data);
+    };
+
+    fetchData();
+  }, []);
+
   const onFinish = (value) => {
     setSpin(true);
     const body = {
@@ -66,7 +81,10 @@ const AddLinks = () => {
       validDateType: 1,
       validDate: moment().local().format('YYYY-MM-DD HH:mm:ss'),
       describe: value.describe || `Short link for ${getDomain(value.originUrl)} readme page`,
+      titleUserCreated: value?.title,
+      groupId: value?.group,
     };
+
     callApi(`${API_URL}/api/v1/admin/short-link/create`, body);
   };
 
@@ -121,6 +139,35 @@ const AddLinks = () => {
                   Destination
                 </Typography>
                 <Form.Item
+                  name="group"
+                  rules={[
+                    {
+                      required: true,
+                      message: 'Please choose group',
+                    },
+                  ]}
+                >
+                  <Select
+                    className="rounded-md h-[42px]"
+                    options={groupData?.map((it) => ({
+                      label: it?.groupName,
+                      value: it?.id,
+                    }))}
+                  ></Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={14}>
+                <Typography
+                  fontSize={16}
+                  fontWeight={700}
+                  sx={{
+                    fontFamily: 'Nunito',
+                    color: '#000',
+                  }}
+                >
+                  Destination
+                </Typography>
+                <Form.Item
                   name="originUrl"
                   rules={[
                     {
@@ -148,7 +195,7 @@ const AddLinks = () => {
                   Title
                 </Typography>
                 <Form.Item name="title">
-                  <Input className="rounded-md border-2 py-2" />
+                  <Input className="rounded-md border-2 py-2" placeholder="Enter title" />
                 </Form.Item>
               </Col>
             </Row>
