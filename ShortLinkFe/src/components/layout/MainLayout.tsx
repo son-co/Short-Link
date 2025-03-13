@@ -169,6 +169,7 @@ const MainLayout: React.FC<LayoutProps> = ({ children }) => {
               onClick={() => {
                 store.dispatch(authActions.logout());
                 message.success(`Logout successfully!`);
+                navigate(PATH.LOGIN_PATH);
               }}
             >
               <LogoutOutlined /> Logout
