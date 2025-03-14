@@ -9,6 +9,7 @@ import com.shop.bike.repository.ClickCountRepository;
 import com.shop.bike.repository.OtpRepository;
 import com.shop.bike.repository.ShortLinkRepository;
 import com.shop.bike.repository.UserRepository;
+import com.shop.bike.security.SecurityUtils;
 import com.shop.bike.service.ClickCountService;
 import com.shop.bike.service.MailService;
 import com.shop.bike.service.OtpService;
@@ -83,7 +84,12 @@ public class ClickCountServiceImpl implements ClickCountService {
 
 	@Override
 	public List<StatisticPojo> statistic(String fromDate, String toDate) {
-		return clickCountRepository.statisticClick(fromDate, toDate);
+		return clickCountRepository.statisticClick(fromDate, toDate, SecurityUtils.getCurrentUserLogin().get());
+	}
+
+	@Override
+	public void autoDeleted() {
+		clickCountRepository.deleteValue();
 	}
 
 	public static String encodePhone(String phoneNumber) {

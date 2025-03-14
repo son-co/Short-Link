@@ -3,10 +3,12 @@ package com.shop.bike.repository;
 import com.shop.bike.entity.ClickCount;
 import com.shop.bike.entity.Otp;
 import com.shop.bike.service.dto.StatisticPojo;
+import io.swagger.models.auth.In;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -38,18 +40,27 @@ public interface ClickCountRepository extends JpaRepository<ClickCount, Long> {
                                        @Param("toDate") Instant toDate,
                                        Pageable pageable);
 
-    @Query(value = "SELECT  " +
-            "    COUNT(x.id) AS totalClick,  " +
-            "    DATE(x.created_date) AS date   " +
-            "FROM telcosms_shortlink.click_count x " +
-            "WHERE x.origin_url is not null and " +
-            "(:fromDate is null or (x.created_date >= :fromDate)) " +
-            "and (:toDate is null or (x.created_date <= :toDate)) " +
-            "GROUP BY DATE(x.created_date); ", nativeQuery = true)
+    @Query(value = "SELECT    " +
+            "                COUNT(x.id) AS totalClick,    " +
+            "                DATE(x.created_date) AS date     " +
+            "            FROM telcosms_shortlink.click_count x   " +
+            "            left join short_link sl on sl.short_uri = x.short_url " +
+            "            WHERE x.origin_url is not null and  sl.created_by = :userId and " +
+            "            (:fromDate is null or (x.created_date >= :fromDate))   " +
+            "            and (:toDate is null or (x.created_date <= :toDate))   " +
+            "            GROUP BY DATE(x.created_date); ", nativeQuery = true)
     List<StatisticPojo> statisticClick(@Param("fromDate") String fromDate,
-                                       @Param("toDate") String toDate);
+                                       @Param("toDate") String toDate,
+                                       @Param("userId") String userId);
     
     @Query(value = "SELECT count(DISTINCT(cc.ip_address)) from click_count cc where cc.short_url =:shortUrl", nativeQuery = true)
     Integer getTotalClick(@Param("shortUrl")String shortUrl);
+    
+    @Query(value = "SELECT count(DISTINCT(cc.short_link_extra)) from click_count cc where cc.short_url =:shortUrl", nativeQuery = true)
+    Integer getTotalExtra(@Param("shortUrl")String shortUrl);
+    
+    @Modifying
+    @Query(value = "delete from click_count where t_domain is null", nativeQuery = true)
+    void deleteValue();
 
 }

@@ -21,6 +21,7 @@ import {
   CopyOutlined,
   EyeFilled,
   EyeInvisibleFilled,
+  GlobalOutlined,
   SignalFilled,
 } from '@ant-design/icons';
 import * as PATH from '@/routes/routesConfig';
@@ -310,13 +311,33 @@ const LinksPage = () => {
               {currentData?.map((it, index) => (
                 // Thay đổi cấu trúc Box chứa content
                 <Card key={index} className="w-full">
-                  <Box className="border sm:hidden rounded-full flex items-center justify-center p-2 w-[40px] flex-shrink-0">
-                    {it.favicon ? (
-                      <Image preview={false} src={it.favicon} width={20} height={20} />
-                    ) : (
-                      <Image src="/thumbnail.png" preview={false} width={20} height={20} />
-                    )}
+                  <Box className="flex gap-3">
+                    <Box className="border sm:hidden rounded-full flex items-center justify-center p-2 w-[40px] flex-shrink-0">
+                      {it.favicon ? (
+                        <Image preview={false} src={it.favicon} width={20} height={20} />
+                      ) : (
+                        <Image src="/thumbnail.png" preview={false} width={20} height={20} />
+                      )}
+                    </Box>
+                    <Box className="flex sm:hidden items-center justify-between w-full">
+                      <Link to={it?.shortUrl} target="_blank" className="w-full">
+                        <Typography
+                          sx={{
+                            fontFamily: 'Nunito',
+                            fontSize: 18,
+                            fontWeight: 700,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            color: '#89de2b',
+                          }}
+                        >
+                          {it?.titleUserCreated || 'Title'}
+                        </Typography>
+                      </Link>
+                    </Box>
                   </Box>
+
                   <Box className="flex items-start gap-3 w-full">
                     {/* Box avatar giữ nguyên */}
                     <Box className="border hidden rounded-full sm:flex items-center justify-center p-2 w-[40px] flex-shrink-0">
@@ -329,7 +350,7 @@ const LinksPage = () => {
 
                     {/* Box content chính - thêm flex-1 và min-width-0 để handle text overflow */}
                     <Box className="flex-1 min-w-0">
-                      <Box className="flex items-center justify-between w-full">
+                      <Box className=" hidden md:flex items-center justify-between w-full">
                         <Link to={it?.shortUrl} target="_blank" className="w-full">
                           <Typography
                             sx={{
@@ -392,15 +413,22 @@ const LinksPage = () => {
                           </Typography>
                         </Link>
                       </Box>
-                      <Box className="flex items-center gap-3">
+                      <Box className="flex flex-col lg:flex-row lg:items-center md:gap-3">
                         <Typography
                           sx={{
                             fontFamily: 'Nunito',
                             fontSize: 13,
                           }}
                         >
-                          <CalendarFilled /> {/* {moment(it?.validDate).format('MMM DD, YYYY')} */}{' '}
-                          {moment(it?.validDate).format('YYYY-MM-DD HH:mm:ss')}
+                          <CalendarFilled /> {moment(it?.validDate).format('YYYY-MM-DD HH:mm:ss')}
+                        </Typography>{' '}
+                        <Typography
+                          sx={{
+                            fontFamily: 'Nunito',
+                            fontSize: 13,
+                          }}
+                        >
+                          Total short link extra: {it?.totalShortLinkExtra}
                         </Typography>
                         <Button
                           type="text"
@@ -423,7 +451,6 @@ const LinksPage = () => {
                             </>
                           )}
                         </Button>
-
                         {/* <Typography
                         sx={{
                           fontFamily: 'Nunito',

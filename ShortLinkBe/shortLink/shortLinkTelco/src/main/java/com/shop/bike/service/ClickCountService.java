@@ -18,4 +18,6 @@ public interface ClickCountService {
 	
 	List<StatisticPojo> statistic(String fromDate, String toDate);
 	
+	void autoDeleted();
+	
 }

@@ -206,6 +206,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
                 .map(shortLinkDO -> {
                     ShortLinkVM vm = vmMapper.toDto(shortLinkDO);
                     vm.setTotalClick(clickCountRepository.getTotalClick(vm.getShortUri()));
+                    vm.setTotalShortLinkExtra(clickCountRepository.getTotalExtra(vm.getShortUri()));
                     return vm;
                 });
     }

@@ -34,6 +34,8 @@ public class ShortLinkVM {
     private String favicon;
     
     private Integer totalClick;
+    
+    private Integer totalShortLinkExtra;
 
     private String titleUserCreated;
     
