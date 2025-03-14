@@ -74,7 +74,11 @@ const ViewLinks = (props) => {
               <Box>
                 <Button
                   onClick={() => {
-                    if (props?.getShortLinkDetail?.data?.fullShortUrl) {
+                    if (
+                      props?.getShortLinkDetail?.data?.fullShortUrl &&
+                      typeof navigator !== 'undefined' &&
+                      navigator.clipboard
+                    ) {
                       navigator.clipboard
                         .writeText(props?.getShortLinkDetail?.data?.fullShortUrl)
                         .then(() => {
@@ -83,6 +87,25 @@ const ViewLinks = (props) => {
                         .catch((err) => {
                           console.error('Failed to copy:', err);
                         });
+                    } else if (props?.getShortLinkDetail?.data?.fullShortUrl) {
+                      // Fallback method if clipboard API is not available
+                      try {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = props?.getShortLinkDetail?.data?.fullShortUrl;
+                        textarea.style.position = 'fixed'; // Prevent scrolling to bottom
+                        document.body.appendChild(textarea);
+                        textarea.focus();
+                        textarea.select();
+                        const successful = document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        if (successful) {
+                          message.success('Copied to clipboard successfully');
+                        } else {
+                          console.error('Copy command was unsuccessful');
+                        }
+                      } catch (err) {
+                        console.error('Failed to copy with fallback:', err);
+                      }
                     }
                   }}
                 >
@@ -158,15 +181,38 @@ const ViewLinks = (props) => {
           <Box
             className="px-5 py-10 bg-[#eef0f5] cursor-pointer rounded-xl flex justify-center items-center"
             onClick={() => {
-              if (props?.getShortLinkDetail?.data?.fullShortUrl) {
+              if (
+                props?.getShortLinkDetail?.data?.fullShortUrl &&
+                typeof navigator !== 'undefined' &&
                 navigator.clipboard
-                  .writeText(props?.getShortLinkDetail?.data.fullShortUrl)
+              ) {
+                navigator.clipboard
+                  .writeText(props?.getShortLinkDetail?.data?.fullShortUrl)
                   .then(() => {
                     message.success('Copied to clipboard successfully');
                   })
                   .catch((err) => {
                     console.error('Failed to copy:', err);
                   });
+              } else if (props?.getShortLinkDetail?.data?.fullShortUrl) {
+                // Fallback method if clipboard API is not available
+                try {
+                  const textarea = document.createElement('textarea');
+                  textarea.value = props?.getShortLinkDetail?.data?.fullShortUrl;
+                  textarea.style.position = 'fixed'; // Prevent scrolling to bottom
+                  document.body.appendChild(textarea);
+                  textarea.focus();
+                  textarea.select();
+                  const successful = document.execCommand('copy');
+                  document.body.removeChild(textarea);
+                  if (successful) {
+                    message.success('Copied to clipboard successfully');
+                  } else {
+                    console.error('Copy command was unsuccessful');
+                  }
+                } catch (err) {
+                  console.error('Failed to copy with fallback:', err);
+                }
               }
             }}
           >

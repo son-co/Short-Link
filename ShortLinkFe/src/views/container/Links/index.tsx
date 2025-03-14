@@ -439,15 +439,38 @@ const LinksPage = () => {
                     <Box className="flex-shrink-0 hidden sm:flex flex-col justify-between gap-2">
                       <Button
                         onClick={() => {
-                          if (it?.fullShortUrl) {
+                          if (
+                            it?.fullShortUrl &&
+                            typeof navigator !== 'undefined' &&
                             navigator.clipboard
-                              .writeText(it.fullShortUrl)
+                          ) {
+                            navigator.clipboard
+                              .writeText(it?.fullShortUrl)
                               .then(() => {
                                 message.success('Copied to clipboard successfully');
                               })
                               .catch((err) => {
                                 console.error('Failed to copy:', err);
                               });
+                          } else if (it?.fullShortUrl) {
+                            // Fallback method if clipboard API is not available
+                            try {
+                              const textarea = document.createElement('textarea');
+                              textarea.value = it?.fullShortUrl;
+                              textarea.style.position = 'fixed'; // Prevent scrolling to bottom
+                              document.body.appendChild(textarea);
+                              textarea.focus();
+                              textarea.select();
+                              const successful = document.execCommand('copy');
+                              document.body.removeChild(textarea);
+                              if (successful) {
+                                message.success('Copied to clipboard successfully');
+                              } else {
+                                console.error('Copy command was unsuccessful');
+                              }
+                            } catch (err) {
+                              console.error('Failed to copy with fallback:', err);
+                            }
                           }
                         }}
                       >
@@ -479,15 +502,38 @@ const LinksPage = () => {
                     <Box className="flex items-center gap-3">
                       <Button
                         onClick={() => {
-                          if (it?.fullShortUrl) {
+                          if (
+                            it?.fullShortUrl &&
+                            typeof navigator !== 'undefined' &&
                             navigator.clipboard
-                              .writeText(it.fullShortUrl)
+                          ) {
+                            navigator.clipboard
+                              .writeText(it?.fullShortUrl)
                               .then(() => {
                                 message.success('Copied to clipboard successfully');
                               })
                               .catch((err) => {
                                 console.error('Failed to copy:', err);
                               });
+                          } else if (it?.fullShortUrl) {
+                            // Fallback method if clipboard API is not available
+                            try {
+                              const textarea = document.createElement('textarea');
+                              textarea.value = it?.fullShortUrl;
+                              textarea.style.position = 'fixed'; // Prevent scrolling to bottom
+                              document.body.appendChild(textarea);
+                              textarea.focus();
+                              textarea.select();
+                              const successful = document.execCommand('copy');
+                              document.body.removeChild(textarea);
+                              if (successful) {
+                                message.success('Copied to clipboard successfully');
+                              } else {
+                                console.error('Copy command was unsuccessful');
+                              }
+                            } catch (err) {
+                              console.error('Failed to copy with fallback:', err);
+                            }
                           }
                         }}
                       >
