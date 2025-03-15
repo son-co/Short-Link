@@ -1,10 +1,12 @@
 package com.shop.bike.service;
 
 import com.shop.bike.entity.ClickCount;
+import com.shop.bike.pojo.GetValueIpAndPhonePojo;
 import com.shop.bike.service.dto.ClickCountFilterDTO;
 import com.shop.bike.service.dto.StatisticPojo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -19,5 +21,7 @@ public interface ClickCountService {
 	List<StatisticPojo> statistic(String fromDate, String toDate);
 	
 	void autoDeleted();
+
+	List<GetValueIpAndPhonePojo> getValue(String shortUrl);
 	
 }

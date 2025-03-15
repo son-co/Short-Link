@@ -5,6 +5,7 @@ import com.shop.bike.entity.Otp;
 import com.shop.bike.entity.ShortLinkDO;
 import com.shop.bike.entity.User;
 import com.shop.bike.entity.enumeration.ErrorEnum;
+import com.shop.bike.pojo.GetValueIpAndPhonePojo;
 import com.shop.bike.repository.ClickCountRepository;
 import com.shop.bike.repository.OtpRepository;
 import com.shop.bike.repository.ShortLinkRepository;
@@ -92,6 +93,11 @@ public class ClickCountServiceImpl implements ClickCountService {
 	@Override
 	public void autoDeleted() {
 		clickCountRepository.deleteValue();
+	}
+
+	@Override
+	public List<GetValueIpAndPhonePojo> getValue(String shortUrl) {
+		return clickCountRepository.getValue(shortUrl);
 	}
 
 	public static String encodePhone(String phoneNumber) {

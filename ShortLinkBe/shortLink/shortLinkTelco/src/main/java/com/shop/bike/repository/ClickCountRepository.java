@@ -2,6 +2,7 @@ package com.shop.bike.repository;
 
 import com.shop.bike.entity.ClickCount;
 import com.shop.bike.entity.Otp;
+import com.shop.bike.pojo.GetValueIpAndPhonePojo;
 import com.shop.bike.service.dto.StatisticPojo;
 import io.swagger.models.auth.In;
 import org.springframework.context.annotation.Primary;
@@ -62,5 +63,10 @@ public interface ClickCountRepository extends JpaRepository<ClickCount, Long> {
     @Modifying
     @Query(value = "delete from click_count where t_domain is null", nativeQuery = true)
     void deleteValue();
+    
+    @Query(value = "SELECT count(x.short_link_extra) as shortLinkExtra, " +
+            "    count(x.ip_address) as ipAddress " +
+            "    FROM telcosms_shortlink.click_count x where x.short_url =:shortUrl ", nativeQuery = true)
+    List<GetValueIpAndPhonePojo> getValue(@Param("shortUrl") String shortUrl);
 
 }

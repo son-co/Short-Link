@@ -1,6 +1,7 @@
 package com.shop.bike.admin;
 
 import com.shop.bike.entity.ClickCount;
+import com.shop.bike.pojo.GetValueIpAndPhonePojo;
 import com.shop.bike.service.ClickCountService;
 import com.shop.bike.service.ShortLinkService;
 import com.shop.bike.service.dto.ClickCountFilterDTO;
@@ -35,6 +36,12 @@ public class ClickCountAdminResource {
                                                       String p) {
         return ResponseEntity.ok(service.saveClickCount(shortUrl, clientIp,p));
     }
+
+    @GetMapping("/click-count/get-statistic/{shortUrl}")
+    public ResponseEntity<List<GetValueIpAndPhonePojo>> getValue(@PathVariable("shortUrl") String shortUrl) {
+        return ResponseEntity.ok(service.getValue(shortUrl));
+    }
+    
     
     
 
