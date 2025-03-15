@@ -74,6 +74,16 @@ const ViewLinks = (props) => {
               <Box>
                 <Button
                   onClick={() => {
+                    if (props?.getShortLinkDetail?.data?.fullShortUrl) {
+                      navigator.clipboard
+                        .writeText(props?.getShortLinkDetail?.data?.fullShortUrl)
+                        .then(() => {
+                          message.success('Copied to clipboard successfully');
+                        })
+                        .catch((err) => {
+                          console.error('Failed to copy:', err);
+                        });
+                    }
                     if (
                       props?.getShortLinkDetail?.data?.fullShortUrl &&
                       typeof navigator !== 'undefined' &&

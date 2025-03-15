@@ -3,6 +3,7 @@ export const REGISTER_PATH = '/register';
 export const DASHBOARD_PATH = '/';
 export const MAIN_PATH = '/home';
 export const LINKS_PAGE = '/links';
+export const LINKS_GROUPS_PAGE = '/groups-links';
 export const ADD_LINKS_PAGE = '/links/new';
 export const VIEW_LINKS_PAGE = '/links/view';
 export const ANALYTICS_PAGE = '/analytics';
@@ -20,4 +21,5 @@ export const DATA_PATH = [
   ANALYTICS_PAGE,
   HOME_PATH,
   GROUPS_PATH,
+  LINKS_GROUPS_PAGE,
 ];

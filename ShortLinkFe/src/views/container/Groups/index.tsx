@@ -7,6 +7,8 @@ import moment from 'moment';
 import { DeleteFilled, EditFilled, EyeFilled } from '@ant-design/icons';
 import EditModal from './Components/EditModal';
 import ConfirmModal from './Components/ConfirmModal';
+import { useNavigate } from 'react-router-dom';
+import * as PATH from '@/routes/routesConfig';
 
 const GroupsPage = () => {
   const [listData, setListData] = React.useState([]);
@@ -17,6 +19,7 @@ const GroupsPage = () => {
   const [groupId, setGroupId] = useState(null);
   const [isShowEditModal, setIsShowEditModal] = useState(false);
   const [isShowConfirmModal, setIsShowConfirmModal] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,7 +56,7 @@ const GroupsPage = () => {
       width: '150px',
       align: 'center',
       key: 'id',
-      render: (text) => {
+      render: (text, row) => {
         return (
           <Box
             className="flex gap-2 w-full justify-center"
@@ -63,9 +66,17 @@ const GroupsPage = () => {
               },
             }}
           >
-            {/* <Button type="text" className="text-green-600 !p-0">
+            <Button
+              type="text"
+              className="text-green-600 !p-0"
+              onClick={() => {
+                navigate(PATH.LINKS_GROUPS_PAGE, {
+                  state: { name: row?.groupName, id: text },
+                });
+              }}
+            >
               <EyeFilled />
-            </Button> */}
+            </Button>
             <Button
               type="text"
               className="text-yellow-600"

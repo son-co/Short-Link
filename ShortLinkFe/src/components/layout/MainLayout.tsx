@@ -3,7 +3,6 @@ import {
   DashboardOutlined,
   LinkOutlined,
   PieChartOutlined,
-  QrcodeOutlined,
   SettingOutlined,
   CloseOutlined,
   MenuOutlined,
@@ -56,6 +55,7 @@ const selectedMenus = () => {
     case PATH.LINKS_PAGE:
     case PATH.ADD_LINKS_PAGE:
     case PATH.VIEW_LINKS_PAGE:
+    case PATH.LINKS_GROUPS_PAGE:
       return '2';
     case PATH.GROUPS_PATH:
       return '3';
@@ -169,7 +169,6 @@ const MainLayout: React.FC<LayoutProps> = ({ children }) => {
               onClick={() => {
                 store.dispatch(authActions.logout());
                 message.success(`Logout successfully!`);
-                navigate(PATH.LOGIN_PATH);
               }}
             >
               <LogoutOutlined /> Logout

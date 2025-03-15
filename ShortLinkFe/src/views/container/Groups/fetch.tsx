@@ -11,12 +11,14 @@ const fetchApi = async ({
   body = null,
   isToken = false,
   setLoading = (loading: boolean) => {},
+  params = {},
 }: {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: any;
   isToken?: boolean;
   setLoading?: (loading: boolean) => void;
+  params?: Record<string, any>;
 }) => {
   const token = getCookie(JWT);
   setLoading(true); // Không còn lỗi TypeScript
@@ -27,7 +29,10 @@ const fetchApi = async ({
       ...(isToken && { Authorization: `Bearer ${token}` }),
     };
 
-    const response = await fetch(url, {
+    const queryString = new URLSearchParams(params).toString();
+    const requestUrl = queryString ? `${url}?${queryString}` : url;
+
+    const response = await fetch(requestUrl, {
       method,
       headers,
       ...(body ? { body: JSON.stringify(body) } : {}),

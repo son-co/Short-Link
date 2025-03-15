@@ -15,7 +15,7 @@ import {
 } from 'antd';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   CalendarFilled,
   CopyOutlined,
@@ -25,11 +25,11 @@ import {
   SignalFilled,
 } from '@ant-design/icons';
 import * as PATH from '@/routes/routesConfig';
-import fetchApi from '../Groups/fetch';
+import fetchApi from '../fetch';
 
 const { RangePicker } = DatePicker;
 
-const LinksPage = () => {
+const FilterGroupPage = () => {
   const token = getCookie(JWT);
   const [listData, setListData] = useState<any>([]);
   const navigate = useNavigate();
@@ -43,8 +43,8 @@ const LinksPage = () => {
   const [isFilter, setIsFilter] = useState(true);
   const [isClearFilter, setIsClearFilter] = useState(false);
   const [isOpenDropDown, setIsOpenDropDown] = useState(false);
-  const [groupData, setGroupData] = useState<any>([]);
-
+  const location = useLocation();
+  const dataFilter = location?.state;
   // Xác định dữ liệu của trang hiện tại
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
@@ -94,25 +94,24 @@ const LinksPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchApi({
-        url: `${API_URL}/api/v1/admin/group-link/get-list`,
+        url: `${API_URL}/api/v1/admin/short-link/get-list`,
         method: 'GET',
         isToken: true,
+        params: dataFilter?.id
+          ? { groupId: dataFilter?.id, ...filterDate, ...searchValue }
+          : { ...filterDate, ...searchValue },
+        setLoading: (loading: boolean) => {
+          setSpin(loading);
+          setIsFilter(false);
+        },
       });
-      setGroupData(data);
+      setListData(data);
     };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    isFilter &&
-      callApi(
-        `${API_URL}/api/v1/admin/short-link/get-list`,
-        isClearFilter ? filterDate : { ...filterDate, ...searchValue },
-        'GET',
-        setListData
-      );
-  }, [filterDate, isFilter, isClearFilter, needLoadData]);
+    if (isFilter) {
+      setSpin(true);
+      fetchData();
+    }
+  }, [filterDate, isFilter, isClearFilter, needLoadData, dataFilter]);
 
   useEffect(() => {
     if (listData?.length > 0) {
@@ -129,13 +128,11 @@ const LinksPage = () => {
     if (dates && dates[0] && dates[1]) {
       setNeedLoadData(true);
       setIsFilter(true);
-
       setFilterDate({
         validDateFrom: dates[0].toISOString(),
         validDateTo: dates[1].toISOString(),
       });
     }
-
     if (!dates) {
       setNeedLoadData(true);
       setIsFilter(true);
@@ -215,25 +212,6 @@ const LinksPage = () => {
         />
       </Box>
 
-      <Box className="flex flex-col">
-        <span>Groups</span>
-        <Select
-          onChange={(e) => {
-            setSearchValue((prev) => ({
-              ...prev,
-              groupId: e,
-            }));
-          }}
-          placeholder="Choose group"
-          value={searchValue?.groupId}
-          className="rounded-md h-[36px]"
-          options={groupData?.map((it) => ({
-            label: it?.groupName,
-            value: it?.id,
-          }))}
-        ></Select>
-      </Box>
-
       {/* Filter Button */}
       <Box className="w-full flex gap-3">
         <Button
@@ -290,7 +268,7 @@ const LinksPage = () => {
             fontFamily: 'Archivo Black',
           }}
         >
-          Short Links
+          {dataFilter?.name}
         </Typography>
         <Button
           type="primary"
@@ -594,4 +572,4 @@ const LinksPage = () => {
   );
 };
 
-export default LinksPage;
+export default FilterGroupPage;

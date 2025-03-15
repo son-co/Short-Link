@@ -9,6 +9,7 @@ import AnalyticsPage from '@/views/container/Analytics';
 import DashboardPage from '@/views/container/Dashboard';
 import AuthorizedRoute from './AuthorizedRoute';
 import GroupsPage from '@/views/container/Groups';
+import FilterGroupPage from '@/views/container/Groups/Components/FilterGroupPage';
 
 const AppRoutes = () => {
   const location = useLocation(); // Lấy thông tin URL hiện tại
@@ -71,6 +72,15 @@ const AppRoutes = () => {
         element={
           <AuthorizedRoute path={PATH.GROUPS_PATH}>
             <GroupsPage />
+          </AuthorizedRoute>
+        }
+      />
+
+      <Route
+        path={PATH.LINKS_GROUPS_PAGE}
+        element={
+          <AuthorizedRoute path={PATH.LINKS_GROUPS_PAGE}>
+            <FilterGroupPage />
           </AuthorizedRoute>
         }
       />
