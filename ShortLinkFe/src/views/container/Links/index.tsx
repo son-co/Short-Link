@@ -555,19 +555,12 @@ const LinksPage = () => {
                       </Button>
 
                       <Box className="border rounded-md p-1 flex justify-center divide-x-2 gap-2">
-                        <Typography>Number Of Clicks</Typography>
-                        <Typography
-                          sx={{
-                            fontFamily: 'Nunito',
-                            fontSize: 13,
-                            display: 'flex',
-                            gap: '5px',
-                            justifyContent: 'between',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <img src="/icons/click.svg" width={15} /> {it?.totalClick || 0}
-                        </Typography>
+                        <Box className="flex justify-between items-center gap-1">
+                          <span>Clicks_IP: </span> <span>{it?.totalClick || 0}</span>
+                        </Box>
+                        <Box className="flex justify-between items-center gap-1 pl-1">
+                          <span>Clicks_User: </span> <span>{it?.totalShortLinkExtra || 0}</span>
+                        </Box>
                       </Box>
                     </Box>
                   </Box>
