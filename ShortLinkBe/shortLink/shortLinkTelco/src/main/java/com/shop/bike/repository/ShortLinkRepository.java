@@ -31,7 +31,20 @@ public interface ShortLinkRepository extends JpaRepository<ShortLinkDO, Long> {
             "              AND (:fullShortUrl IS NULL OR x.full_short_url  LIKE CONCAT('%', :fullShortUrl, '%'))   " +
             "              AND (:originUrl IS NULL OR x.origin_url LIKE CONCAT('%', :originUrl, '%'))   " +
             "              AND (:fromDate IS NULL OR x.valid_date  >= :fromDate)   " +
-            "              AND (:toDate IS NULL OR x.valid_date <= :toDate) order by x.valid_date desc ", nativeQuery = true)
+            "              AND (:toDate IS NULL OR x.valid_date <= :toDate) order by x.valid_date desc ",
+            countQuery = "SELECT COUNT(*) FROM telcosms_shortlink.short_link x " +
+            "WHERE (:userId IS NULL OR x.created_by = :userId) " +
+            "AND (:id IS NULL OR CAST(x.id AS CHAR) LIKE CONCAT('%', :id, '%')) " +
+            "AND (:groupId IS NULL OR CAST(x.group_id AS CHAR) LIKE CONCAT('%', :groupId, '%')) " +
+            "AND (:domain IS NULL OR x.t_domain LIKE CONCAT('%', :domain, '%')) " +
+            "AND (:title IS NULL OR x.title LIKE CONCAT('%', :title, '%')) " +
+            "AND (:titleUserCreated IS NULL OR x.title_user_created LIKE CONCAT('%', :titleUserCreated, '%')) " +
+            "AND (:shortUri IS NULL OR x.short_uri LIKE CONCAT('%', :shortUri, '%')) " +
+            "AND (:fullShortUrl IS NULL OR x.full_short_url LIKE CONCAT('%', :fullShortUrl, '%')) " +
+            "AND (:originUrl IS NULL OR x.origin_url LIKE CONCAT('%', :originUrl, '%')) " +
+            "AND (:fromDate IS NULL OR x.valid_date >= :fromDate) " +
+            "AND (:toDate IS NULL OR x.valid_date <= :toDate)",
+            nativeQuery = true)
     Page<ShortLinkDO> findAllWithFilter(@Param("id") Long id,
                                         @Param("groupId") Long groupId,
                                         @Param("domain") String domain,

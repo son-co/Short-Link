@@ -70,6 +70,8 @@ public class ClickCountServiceImpl implements ClickCountService {
 		if(p!=null) {
 			System.out.println("p is:");
 			clickCount.setShortLinkExtra(decodePhone(p));
+		}else{
+			clickCount.setShortLinkExtra("");
 		}
 		return clickCountRepository.save(clickCount);
 		
