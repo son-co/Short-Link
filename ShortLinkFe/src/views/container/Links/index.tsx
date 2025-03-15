@@ -422,14 +422,6 @@ const LinksPage = () => {
                         >
                           <CalendarFilled /> {moment(it?.validDate).format('YYYY-MM-DD HH:mm:ss')}
                         </Typography>{' '}
-                        <Typography
-                          sx={{
-                            fontFamily: 'Nunito',
-                            fontSize: 13,
-                          }}
-                        >
-                          Total short link extra: {it?.totalShortLinkExtra}
-                        </Typography>
                         <Button
                           type="text"
                           onClick={() =>
@@ -503,20 +495,15 @@ const LinksPage = () => {
                       >
                         <CopyOutlined /> Copy
                       </Button>
-                      <Box className="border rounded-md p-1 flex justify-center flex-col items-center">
-                        Number Of Clicks
-                        <Typography
-                          sx={{
-                            fontFamily: 'Nunito',
-                            fontSize: 13,
-                            display: 'flex',
-                            gap: '5px',
-                            justifyContent: 'between',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <img src="/icons/click.svg" width={15} /> {it?.totalClick || 0}
-                        </Typography>
+                      <Box className="border rounded-md py-2 px-3 min-w-[130px]">
+                        <Box className="flex justify-between items-center">
+                          <span>Clicks_IP:</span>
+                          <span>{it?.totalClick || 0}</span>
+                        </Box>
+                        <Box className="flex justify-between items-center">
+                          <span>Clicks_User:</span>
+                          <span>{it?.totalShortLinkExtra || 0}</span>
+                        </Box>
                       </Box>
                     </Box>
                   </Box>
