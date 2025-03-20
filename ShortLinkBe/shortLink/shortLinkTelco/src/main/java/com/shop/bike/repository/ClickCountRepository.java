@@ -54,7 +54,9 @@ public interface ClickCountRepository extends JpaRepository<ClickCount, Long> {
                                        @Param("toDate") String toDate,
                                        @Param("userId") String userId);
     
-    @Query(value = "SELECT count(DISTINCT(cc.ip_address)) from click_count cc where cc.short_url =:shortUrl", nativeQuery = true)
+    @Query(value = "SELECT COUNT(DISTINCT CONCAT(cc.ip_address, '_', cc.cookie)) " +
+            "FROM click_count cc " +
+            "WHERE cc.short_url = :shortUrl ", nativeQuery = true)
     Integer getTotalClick(@Param("shortUrl")String shortUrl);
     
     @Query(value = "SELECT count(DISTINCT(cc.short_link_extra)) from click_count cc where cc.short_url =:shortUrl", nativeQuery = true)
