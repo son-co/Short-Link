@@ -43,4 +43,7 @@ public class ClickCount {
 	
 	@Column(name = "short_link_extra")
 	private String shortLinkExtra;
+	
+	@Column(name = "cookie")
+	private String cookie;
 }

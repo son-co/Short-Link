@@ -58,7 +58,7 @@ public class ClickCountServiceImpl implements ClickCountService {
 
 
 	@Override
-	public ClickCount saveClickCount(String shortUrl, String clientIp, String p) {
+	public ClickCount saveClickCount(String shortUrl, String clientIp,String cookie, String p) {
 		ShortLinkDO shortLinkDO = shortLinkRepository.findByShortUri(shortUrl);
 		ClickCount clickCount = new ClickCount();
 		if(shortLinkDO!=null) {
@@ -68,6 +68,7 @@ public class ClickCountServiceImpl implements ClickCountService {
 		System.out.println("client id: "+ clientIp);
 		clickCount.setIpAddress(clientIp);
 		clickCount.setShortUrl(shortUrl);
+		clickCount.setCookie(cookie);
 		if(p!=null) {
 			System.out.println("p is:");
 			clickCount.setShortLinkExtra(decodePhone(p));

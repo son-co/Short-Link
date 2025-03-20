@@ -397,13 +397,13 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         return false; // Trả về false nếu có lỗi
     }
 
-    private void clickCount(String shortUrl,String p, String clientId) {
+    private void clickCount(String shortUrl,String p, String clientId, String cookie) {
         String api;
         if(p!=null)
         // Tạo HttpClient
-            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientId+"?p="+p;
+            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientId+"?p="+p+"?cookie="+cookie;
         else
-            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientId; 
+            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientId+"?cookie="+cookie; 
         HttpClient client = HttpClient.newHttpClient();
 
         // Tạo HttpRequest
@@ -445,7 +445,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         if(!getState(shortUri)) {
             throw new RuntimeException("Your Link was unactivated");
         }
-        clickCount(shortUri,p, getClientIp(requests));
+        
         System.out.println("this is method to call shortLink");
         String serverName = request.getServerName();
         String serverPort = Optional.of(request.getServerPort())
@@ -456,8 +456,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         String fullShortUrl = serverName + serverPort + "/" + shortUri;
         String originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(originalLink)) {
-            shortLinkStats(buildLinkStatsRecordAndSetUser(fullShortUrl, request, response));
+            ShortLinkStatsRecordDTO shortLinkStatsRecordDTO = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
+            shortLinkStats(shortLinkStatsRecordDTO);
             ((HttpServletResponse) response).sendRedirect(originalLink);
+            clickCount(shortUri,p, getClientIp(requests), shortLinkStatsRecordDTO.getUv());
             return;
         }
         boolean contains = shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl);
