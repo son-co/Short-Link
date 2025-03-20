@@ -43,4 +43,8 @@ public class ClickCount {
 	
 	@Column(name = "short_link_extra")
 	private String shortLinkExtra;
+
+	@Column(name = "agent")
+	private String agent;
+	
 }
