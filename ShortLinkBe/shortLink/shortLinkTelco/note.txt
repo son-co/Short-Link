@@ -1,4 +1,4 @@
-scp -r /Users/thangmai/Desktop/Short-Link/ShortLinkBe/shortLink/shortLinkTelco/target/shortLink-0.0.1-SNAPSHOT.jar  david@8.222.220.102:/home/david 
+scp -r /Users/thangmai/Desktop/backup/Short-Link/ShortLinkBe/shortLink/shortLinkTelco/target/shortLink-0.0.1-SNAPSHOT.jar  david@8.222.220.102:/home/david 
 
 nohup java -jar shortLink-0.0.1-SNAPSHOT.jar > app.log 2>&1 & 
 

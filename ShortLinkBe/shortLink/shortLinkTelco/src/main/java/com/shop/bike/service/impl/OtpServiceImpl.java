@@ -90,7 +90,7 @@ public class OtpServiceImpl implements OtpService {
 			otpRepository.save(otp);
 		}else {
 			otp.setIncorrectOtp(otp.getIncorrectOtp() == null ? 1 : otp.getIncorrectOtp() + 1);
-			otpRepository.saveAndFlush(otp);
+			otpRepository.save(otp);
 			throw new BadRequestAlertException(ErrorEnum.OTP_INCORRECT);
 		}
 		return activeKey;

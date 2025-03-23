@@ -1,11 +1,9 @@
 package com.shop.bike.service.dto;
 
-import java.time.Instant;
+import lombok.Data;
 
-public interface StatisticPojo {
-
-	Integer getTotalClick();
-	
-	
-	String getDate();
+@Data
+public class StatisticPojo {
+	private Integer count;
+	private String date;
 }

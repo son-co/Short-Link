@@ -5,6 +5,7 @@ import com.shop.bike.entity.enumeration.AuthorityType;
 import com.shop.bike.entity.enumeration.ErrorEnum;
 import com.shop.bike.security.jwt.JwtAuthenticationFilter;
 import com.shop.bike.security.jwt.TokenProvider;
+import com.shop.bike.utils.JsonConverter;
 import com.shop.bike.vm.LoginVM;
 import com.shop.bike.web.rest.errors.UsernameNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -48,9 +49,10 @@ public class UserAdminResource {
 						login.getPassword()
 				)
 		);
-		boolean isAdmin = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-				.anyMatch(AuthorityType.ROLE_ADMIN.toString()::equals);
-		if(!isAdmin) throw new UsernameNotFoundException(ErrorEnum.UNAUTHORIZED, null);
+//		boolean isAdmin = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+//				.anyMatch(AuthorityType.ROLE_ADMIN.toString()::equals);
+//		System.out.println("login: "+ JsonConverter.toJson(login));
+//		if(!isAdmin) throw new UsernameNotFoundException(ErrorEnum.UNAUTHORIZED, null);
 		
 		final String token = jwtTokenUtil.generateToken(authentication);
 		HttpHeaders httpHeaders = new HttpHeaders();

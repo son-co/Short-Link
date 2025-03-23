@@ -198,15 +198,18 @@ public class ShortLinkServiceImpl implements ShortLinkService {
 
     @Override
     public Page<ShortLinkVM> findAllShortLink(ShortLinkFilterDTO filterDTO, Pageable pageable) {
+        System.out.println("findAllShortLinkfindAllShortLinkfindAllShortLink3");
         return shortLinkRepository.findAllWithFilter(filterDTO.getId(), filterDTO.getGroupId(),
                 filterDTO.getDomain(), filterDTO.getShortUri(), filterDTO.getFullShortUrl(),
                 filterDTO.getOriginUrl(), filterDTO.getValidDateFrom(), filterDTO.getValidDateTo(),
                         SecurityUtils.getCurrentUserLogin().get(),filterDTO.getTitle(), filterDTO.getTitleUserCreated(),
                         pageable)
                 .map(shortLinkDO -> {
+                    System.out.println("findAllShortLinkfindAllShortLinkfindAllShortLink begin");
                     ShortLinkVM vm = vmMapper.toDto(shortLinkDO);
                     vm.setTotalClick(clickCountRepository.getTotalClick(vm.getShortUri()));
                     vm.setTotalShortLinkExtra(clickCountRepository.getTotalExtra(vm.getShortUri()));
+                    System.out.println("findAllShortLinkfindAllShortLinkfindAllShortLink end");
                     return vm;
                 });
     }
@@ -220,7 +223,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
         StatisticOverview statisticOverview = new StatisticOverview();
         statisticOverview.setAllUrls(shortLinkRepository.getStatistic(null, null));
         statisticOverview.setLinkAddedThisMonth(linkThisMonth);
-        statisticOverview.setTotalClicks(Integer.parseInt(String.valueOf(clickCountRepository.count())));
+        statisticOverview.setTotalClicks(clickCountRepository.count().intValue());
         
         //get link increment
         Instant DayOfMonthBefore = LocalDate.now().withDayOfMonth(1) // Lấy ngày đầu tiên của tháng hiện tại
@@ -263,7 +266,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
         ShortLinkDO shortLinkDO = new ShortLinkDO();
         shortLinkDO.setDomain(requestParam.getDomain());
         shortLinkDO.setFullShortUrl(responseDTO.getData().getFullShortUrl());
-        shortLinkDO.setShortUri(responseDTO.getData().getFullShortUrl().replaceAll("https://api.shrsms.com/",""));
+        shortLinkDO.setShortUri(responseDTO.getData().getFullShortUrl().replaceAll("https://lyl.la/",""));
         shortLinkDO.setOriginUrl(requestParam.getOriginUrl());
         shortLinkDO.setClickNum(0);
         shortLinkDO.setGid(requestParam.getGid());

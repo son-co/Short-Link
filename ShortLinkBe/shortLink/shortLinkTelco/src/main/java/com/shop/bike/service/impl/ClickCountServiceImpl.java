@@ -34,10 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -58,19 +55,20 @@ public class ClickCountServiceImpl implements ClickCountService {
 
 
 	@Override
-	public ClickCount saveClickCount(String shortUrl, String clientIp,String cookie, String p) {
+	public ClickCount saveClickCount(String shortUrl, String clientIp,String cookie, String p,String agent) {
 		ShortLinkDO shortLinkDO = shortLinkRepository.findByShortUri(shortUrl);
 		ClickCount clickCount = new ClickCount();
 		if(shortLinkDO!=null) {
 			clickCount.setDomain(shortLinkDO.getFullShortUrl());
 			clickCount.setOriginUrl(shortLinkDO.getOriginUrl());
 		}
-		System.out.println("client id: "+ clientIp);
-		clickCount.setIpAddress(clientIp);
-		clickCount.setShortUrl(shortUrl);
-		clickCount.setCookie(cookie);
+
+		clickCount.setShortUrl(Objects.requireNonNullElse(shortUrl, ""));
+		clickCount.setIpAddress(Objects.requireNonNullElse(clientIp, ""));
+		clickCount.setAgent(Objects.requireNonNullElse(agent, ""));
+        clickCount.setCookie(Objects.requireNonNullElse(cookie, ""));
+
 		if(p!=null) {
-			System.out.println("p is:");
 			clickCount.setShortLinkExtra(decodePhone(p));
 		}else{
 			clickCount.setShortLinkExtra("");
@@ -98,7 +96,7 @@ public class ClickCountServiceImpl implements ClickCountService {
 
 	@Override
 	public List<GetValueIpAndPhonePojo> getValue(String shortUrl) {
-		return clickCountRepository.getValue(shortUrl);
+		return clickCountRepository.getValueIpAndPhone(shortUrl);
 	}
 
 	public static String encodePhone(String phoneNumber) {
