@@ -76,9 +76,11 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -397,15 +399,29 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         return false; // Trả về false nếu có lỗi
     }
 
-    private void clickCount(String shortUrl,String p, String clientId, String cookie) {
+    private void clickCount(String shortUrl,String p, String clientIp,String userAgent,String cookie) {
+
         String api;
         if(p!=null)
         // Tạo HttpClient
-            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientId+"?p="+p+"?cookie="+cookie;
+            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientIp+"?p="+p+"&";
         else
-            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientId+"?cookie="+cookie; 
-        HttpClient client = HttpClient.newHttpClient();
+            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientIp+"?";;
 
+        if(userAgent!=null){
+            // Tạo HttpClient
+            String encodedUserAgent = URLEncoder.encode(userAgent, StandardCharsets.UTF_8);
+            api = api+"agent="+encodedUserAgent+"&";
+        }
+
+        if(cookie!=null){
+            // Tạo HttpClient
+            api = api+"cookie="+cookie;
+
+        }
+
+        HttpClient client = HttpClient.newHttpClient();
+        log.info("clickCount request url : " + api);
         // Tạo HttpRequest
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(api)) // Đường dẫn API
@@ -439,13 +455,31 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         System.out.println("client ip: "+ ip);
         return ip;
     }
+
+    public String getClientUserAgent(HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+
+        // 打印或记录日志
+        System.out.println("User-Agent: " + userAgent);
+        return userAgent;
+    }
+
+    public String getClientUserReferer(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+
+        // 打印或记录日志
+        System.out.println("referer: " + referer);
+        return referer;
+    }
     @SneakyThrows
     @Override
     public void restoreUrl(String shortUri,String p, ServletRequest request, ServletResponse response, HttpServletRequest requests) {
         if(!getState(shortUri)) {
             throw new RuntimeException("Your Link was unactivated");
         }
-        
+
+//        clickCount(shortUri,p, getClientIp(requests),getClientUserAgent(requests),getClientUserReferer(requests));
+
         System.out.println("this is method to call shortLink");
         String serverName = request.getServerName();
         String serverPort = Optional.of(request.getServerPort())
@@ -459,7 +493,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             ShortLinkStatsRecordDTO shortLinkStatsRecordDTO = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
             shortLinkStats(shortLinkStatsRecordDTO);
             ((HttpServletResponse) response).sendRedirect(originalLink);
-            clickCount(shortUri,p, getClientIp(requests), shortLinkStatsRecordDTO.getUv());
+            clickCount(shortUri,p, getClientIp(requests),getClientUserAgent(requests), shortLinkStatsRecordDTO.getUv());
             return;
         }
         boolean contains = shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl);
