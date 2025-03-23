@@ -46,5 +46,7 @@ public class ClickCount {
 
 	@Column(name = "agent")
 	private String agent;
-	
+
+	@Column(name = "cookie")
+	private String cookie;
 }

@@ -14,7 +14,7 @@ import java.util.Map;
 
 public interface ClickCountService {
 
-	ClickCount saveClickCount(String shortUrl, String clientId, String p, String agent);
+	ClickCount saveClickCount(String shortUrl, String clientId,String cookie, String p, String agent);
 	
 	Page<ClickCount> findAllClickCount(ClickCountFilterDTO filterDTO, Pageable pageable);
 	
