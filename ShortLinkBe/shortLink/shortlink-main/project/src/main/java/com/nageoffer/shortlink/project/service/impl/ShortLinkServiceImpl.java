@@ -68,10 +68,24 @@ import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.Executors;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -81,17 +95,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.time.Duration;
 
 import static com.nageoffer.shortlink.project.common.constant.RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY;
 import static com.nageoffer.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
@@ -399,46 +403,49 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         return false; // Trả về false nếu có lỗi
     }
 
-    private void clickCount(String shortUrl,String p, String clientIp,String userAgent,String cookie) {
+    private void clickCount(String shortUrl, String p, String clientIp, String userAgent, String cookie) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                String api;
+                if (p != null) {
+                    api = "http://localhost:8103/api/v1/consumer/public/click-count/" + shortUrl + "/" + clientIp + "?p=" + p + "&";
+                } else {
+                    api = "http://localhost:8103/api/v1/consumer/public/click-count/" + shortUrl + "/" + clientIp + "?";
+                }
 
-        String api;
-        if(p!=null)
-        // Tạo HttpClient
-            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientIp+"?p="+p+"&";
-        else
-            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientIp+"?";;
+                if (userAgent != null) {
+                    String encodedUserAgent = URLEncoder.encode(userAgent, StandardCharsets.UTF_8);
+                    api = api + "agent=" + encodedUserAgent + "&";
+                }
 
-        if(userAgent!=null){
-            // Tạo HttpClient
-            String encodedUserAgent = URLEncoder.encode(userAgent, StandardCharsets.UTF_8);
-            api = api+"agent="+encodedUserAgent+"&";
-        }
+                if (cookie != null) {
+                    api = api + "cookie=" + cookie;
+                }
 
-        if(cookie!=null){
-            // Tạo HttpClient
-            api = api+"cookie="+cookie;
+                HttpClient client = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofMillis(100))
+                        .build();
 
-        }
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(api))
+                        .GET()
+                        .timeout(Duration.ofMillis(100))
+                        .build();
 
-        HttpClient client = HttpClient.newHttpClient();
-        log.info("clickCount request url : " + api);
-        // Tạo HttpRequest
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(api)) // Đường dẫn API
-                .GET()                    // Phương thức GET
-                .build();
-        try {
-            // Gửi yêu cầu và nhận phản hồi
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            // In phản hồi ra console (hoặc xử lý theo ý muốn)
-            System.out.println("Response Code: " + response.statusCode());
-            System.out.println("Response Body: " + response.body());
-
-        } catch (IOException | InterruptedException e) {
-            // Xử lý ngoại lệ
-            e.printStackTrace();
-        }
+                client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                        .thenAccept(response -> {
+                            if (response.statusCode() != 200) {
+                                log.error("Click count failed with status code: {}", response.statusCode());
+                            }
+                        })
+                        .exceptionally(throwable -> {
+                            log.error("Click count failed", throwable);
+                            return null;
+                        });
+            } catch (Exception e) {
+                log.error("Error in clickCount", e);
+            }
+        });
     }
 
     public String getClientIp(HttpServletRequest request) {
@@ -471,16 +478,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         System.out.println("referer: " + referer);
         return referer;
     }
+
     @SneakyThrows
     @Override
-    public void restoreUrl(String shortUri,String p, ServletRequest request, ServletResponse response, HttpServletRequest requests) {
-        if(!getState(shortUri)) {
-            throw new RuntimeException("Your Link was unactivated");
-        }
-
-//        clickCount(shortUri,p, getClientIp(requests),getClientUserAgent(requests),getClientUserReferer(requests));
-
-        System.out.println("this is method to call shortLink");
+    public void restoreUrl(String shortUri, String p, ServletRequest request, ServletResponse response, HttpServletRequest requests) {
         String serverName = request.getServerName();
         String serverPort = Optional.of(request.getServerPort())
                 .filter(each -> !Objects.equals(each, 80))
@@ -488,63 +489,84 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .map(each -> ":" + each)
                 .orElse("");
         String fullShortUrl = serverName + serverPort + "/" + shortUri;
-        String originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
+        
+        // Use pipeline to get both values in one Redis round trip
+        String originalLink = getOriginalUrlWithPipeline(fullShortUrl);
         if (StrUtil.isNotBlank(originalLink)) {
-            ShortLinkStatsRecordDTO shortLinkStatsRecordDTO = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
-            shortLinkStats(shortLinkStatsRecordDTO);
+            // Move stats collection to a separate thread pool
+            CompletableFuture.runAsync(() -> {
+                try {
+                    ShortLinkStatsRecordDTO shortLinkStatsRecordDTO = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
+                    shortLinkStats(shortLinkStatsRecordDTO);
+                    clickCount(shortUri, p, getClientIp(requests), getClientUserAgent(requests), shortLinkStatsRecordDTO.getUv());
+                } catch (Exception e) {
+                    log.error("Error processing stats", e);
+                }
+            }, Executors.newFixedThreadPool(10));
+            
             ((HttpServletResponse) response).sendRedirect(originalLink);
-            clickCount(shortUri,p, getClientIp(requests),getClientUserAgent(requests), shortLinkStatsRecordDTO.getUv());
             return;
         }
-        boolean contains = shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl);
-        if (!contains) {
+
+        // Check bloom filter before proceeding
+        if (!shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl)) {
             ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
-        String gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
-        if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
-            ((HttpServletResponse) response).sendRedirect("/page/notfound");
-            return;
-        }
+
+        // Use tryLock with shorter timeout
         RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
-        lock.lock();
+        if (!lock.tryLock(500, TimeUnit.MILLISECONDS)) {
+            ((HttpServletResponse) response).sendRedirect("/page/notfound");
+            return;
+        }
+
         try {
-            originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
+            // Double check after acquiring lock
+            originalLink = getOriginalUrlWithPipeline(fullShortUrl);
             if (StrUtil.isNotBlank(originalLink)) {
-                shortLinkStats(buildLinkStatsRecordAndSetUser(fullShortUrl, request, response));
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        ShortLinkStatsRecordDTO shortLinkStatsRecordDTO = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
+                        shortLinkStats(shortLinkStatsRecordDTO);
+                        clickCount(shortUri, p, getClientIp(requests), getClientUserAgent(requests), shortLinkStatsRecordDTO.getUv());
+                    } catch (Exception e) {
+                        log.error("Error processing stats", e);
+                    }
+                }, Executors.newFixedThreadPool(10));
                 ((HttpServletResponse) response).sendRedirect(originalLink);
                 return;
             }
-            gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
-            if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
-                ((HttpServletResponse) response).sendRedirect("/page/notfound");
-                return;
-            }
-            LambdaQueryWrapper<ShortLinkGotoDO> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDO.class)
-                    .eq(ShortLinkGotoDO::getFullShortUrl, fullShortUrl);
-            ShortLinkGotoDO shortLinkGotoDO = shortLinkGotoMapper.selectOne(linkGotoQueryWrapper);
-            if (shortLinkGotoDO == null) {
-                stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
-                ((HttpServletResponse) response).sendRedirect("/page/notfound");
-                return;
-            }
-            LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
-                    .eq(ShortLinkDO::getGid, shortLinkGotoDO.getGid())
+
+            // Query database with optimized query
+            ShortLinkDO shortLinkDO = baseMapper.selectOne(
+                Wrappers.lambdaQuery(ShortLinkDO.class)
                     .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
                     .eq(ShortLinkDO::getDelFlag, 0)
-                    .eq(ShortLinkDO::getEnableStatus, 0);
-            ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
+                    .eq(ShortLinkDO::getEnableStatus, 0)
+                    .last("LIMIT 1")
+            );
+
             if (shortLinkDO == null || (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().before(new Date()))) {
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
             }
-            stringRedisTemplate.opsForValue().set(
-                    String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
-                    shortLinkDO.getOriginUrl(),
-                    LinkUtil.getLinkCacheValidTime(shortLinkDO.getValidDate()), TimeUnit.MILLISECONDS
-            );
-            shortLinkStats(buildLinkStatsRecordAndSetUser(fullShortUrl, request, response));
+
+            // Cache the original URL with pipeline
+            cacheOriginalUrl(fullShortUrl, shortLinkDO.getOriginUrl(), LinkUtil.getLinkCacheValidTime(shortLinkDO.getValidDate()));
+
+            // Process stats asynchronously
+            CompletableFuture.runAsync(() -> {
+                try {
+                    ShortLinkStatsRecordDTO shortLinkStatsRecordDTO = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
+                    shortLinkStats(shortLinkStatsRecordDTO);
+                    clickCount(shortUri, p, getClientIp(requests), getClientUserAgent(requests), shortLinkStatsRecordDTO.getUv());
+                } catch (Exception e) {
+                    log.error("Error processing stats", e);
+                }
+            }, Executors.newFixedThreadPool(10));
+
             ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
         } finally {
             lock.unlock();
@@ -681,5 +703,33 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 //        if (!details.contains(domain)) {
 //            throw new ClientException("演示环境为避免恶意攻击，请生成以下网站跳转链接：" + gotoDomainWhiteListConfiguration.getNames());
 //        }
+    }
+
+    // Add Redis pipeline operations
+    private String getOriginalUrlWithPipeline(String fullShortUrl) {
+        return stringRedisTemplate.execute((RedisCallback<String>) connection -> {
+            connection.openPipeline();
+            connection.stringCommands().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl).getBytes());
+            connection.stringCommands().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl).getBytes());
+            List<Object> results = connection.closePipeline();
+            return results.get(0) != null ? new String((byte[]) results.get(0)) : null;
+        });
+    }
+
+    // Cache the original URL with pipeline
+    private void cacheOriginalUrl(String fullShortUrl, String originalUrl, long expiration) {
+        stringRedisTemplate.execute((RedisCallback<Void>) connection -> {
+            connection.openPipeline();
+            connection.stringCommands().set(
+                String.format(GOTO_SHORT_LINK_KEY, fullShortUrl).getBytes(),
+                originalUrl.getBytes()
+            );
+            connection.expire(
+                String.format(GOTO_SHORT_LINK_KEY, fullShortUrl).getBytes(),
+                expiration
+            );
+            connection.closePipeline();
+            return null;
+        });
     }
 }
