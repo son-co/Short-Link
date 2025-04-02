@@ -19,6 +19,7 @@ package com.nageoffer.shortlink.project.config;
 
 import com.nageoffer.shortlink.project.mq.consumer.ShortLinkStatsSaveConsumer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -28,6 +29,8 @@ import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.stream.StreamMessageListenerContainer;
 import org.springframework.data.redis.stream.Subscription;
+import org.springframework.data.redis.stream.StreamMessageListenerContainer.StreamMessageListenerContainerOptions;
+import org.springframework.data.redis.stream.StreamMessageListenerContainer.StreamReadRequest;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
@@ -45,15 +48,17 @@ import static com.nageoffer.shortlink.project.common.constant.RedisKeyConstant.S
  */
 @Configuration
 @RequiredArgsConstructor
-public class RedisStreamConfiguration {
+public class RedisStreamConfiguration implements DisposableBean {
 
     private final RedisConnectionFactory redisConnectionFactory;
     private final ShortLinkStatsSaveConsumer shortLinkStatsSaveConsumer;
+    private StreamMessageListenerContainer<String, MapRecord<String, String, String>> container;
+    private ExecutorService executorService;
 
     @Bean
     public ExecutorService asyncStreamConsumer() {
         AtomicInteger index = new AtomicInteger();
-        return new ThreadPoolExecutor(1,
+        executorService = new ThreadPoolExecutor(1,
                 1,
                 60,
                 TimeUnit.SECONDS,
@@ -66,29 +71,44 @@ public class RedisStreamConfiguration {
                 },
                 new ThreadPoolExecutor.DiscardOldestPolicy()
         );
+        return executorService;
     }
 
     @Bean
-    public Subscription shortLinkStatsSaveConsumerSubscription(ExecutorService asyncStreamConsumer) {
-        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, MapRecord<String, String, String>> options =
-                StreamMessageListenerContainer.StreamMessageListenerContainerOptions
+    public StreamMessageListenerContainer<String, MapRecord<String, String, String>> streamMessageListenerContainer(
+            ExecutorService asyncStreamConsumer) {
+        StreamMessageListenerContainerOptions<String, MapRecord<String, String, String>> options =
+                StreamMessageListenerContainerOptions
                         .builder()
-                        // 一次最多获取多少条消息
                         .batchSize(10)
-                        // 执行从 Stream 拉取到消息的任务流程
                         .executor(asyncStreamConsumer)
-                        // 如果没有拉取到消息，需要阻塞的时间。不能大于 ${spring.data.redis.timeout}，否则会超时
                         .pollTimeout(Duration.ofSeconds(3))
                         .build();
-        StreamMessageListenerContainer.StreamReadRequest<String> streamReadRequest =
-                StreamMessageListenerContainer.StreamReadRequest.builder(StreamOffset.create(SHORT_LINK_STATS_STREAM_TOPIC_KEY, ReadOffset.lastConsumed()))
+
+        container = StreamMessageListenerContainer.create(redisConnectionFactory, options);
+        container.start();
+        return container;
+    }
+
+    @Bean
+    public Subscription shortLinkStatsSaveConsumerSubscription(
+            StreamMessageListenerContainer<String, MapRecord<String, String, String>> container) {
+        StreamReadRequest<String> streamReadRequest =
+                StreamReadRequest.builder(StreamOffset.create(SHORT_LINK_STATS_STREAM_TOPIC_KEY, ReadOffset.lastConsumed()))
                         .cancelOnError(throwable -> false)
                         .consumer(Consumer.from(SHORT_LINK_STATS_STREAM_GROUP_KEY, "stats-consumer"))
                         .autoAcknowledge(true)
                         .build();
-        StreamMessageListenerContainer<String, MapRecord<String, String, String>> listenerContainer = StreamMessageListenerContainer.create(redisConnectionFactory, options);
-        Subscription subscription = listenerContainer.register(streamReadRequest, shortLinkStatsSaveConsumer);
-        listenerContainer.start();
-        return subscription;
+        return container.register(streamReadRequest, shortLinkStatsSaveConsumer);
+    }
+
+    @Override
+    public void destroy() {
+        if (container != null) {
+            container.stop();
+        }
+        if (executorService != null) {
+            executorService.shutdown();
+        }
     }
 }
