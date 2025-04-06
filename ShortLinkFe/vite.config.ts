@@ -15,12 +15,12 @@ export default defineConfig({
     port: 5173, // (Tuỳ chọn) Cổng bạn muốn chạy
     proxy: {
       '/api': {
-        target: 'https://apiDev.shrsms.com', // URL của backend
+        target: 'http://8.222.247.36:8103', // URL của backend
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/api1': {
-        target: 'https://apiDev.shrsms.com', // URL của API 1
+        target: 'http://8.222.247.36:8103', // URL của API 1
         changeOrigin: true,
       },
     },

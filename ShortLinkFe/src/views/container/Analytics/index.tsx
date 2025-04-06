@@ -1,4 +1,4 @@
-import { JWT } from '@/configs';
+import { API_URL, JWT } from '@/configs';
 import { getCookie } from '@/state/utils/session';
 import { Box, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
@@ -64,7 +64,7 @@ const AnalyticsPage = () => {
 
   useEffect(() => {
     callApi(
-      'https://apiDev.shrsms.com/api/v1/admin/click-count/get-statistic',
+      `${API_URL}/api/v1/admin/click-count/get-list`,
       {
         fromDate: filterDate.fromDate.format('YYYY-MM-DD'),
         toDate: filterDate.toDate.format('YYYY-MM-DD'),
