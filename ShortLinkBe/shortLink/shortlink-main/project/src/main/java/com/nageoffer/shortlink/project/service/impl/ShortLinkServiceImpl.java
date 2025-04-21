@@ -49,6 +49,7 @@ import com.nageoffer.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.nageoffer.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.nageoffer.shortlink.project.mq.producer.ShortLinkStatsSaveProducer;
 import com.nageoffer.shortlink.project.service.ShortLinkService;
+import com.nageoffer.shortlink.project.toolkit.BotDetector;
 import com.nageoffer.shortlink.project.toolkit.HashUtil;
 import com.nageoffer.shortlink.project.toolkit.LinkUtil;
 import jakarta.servlet.ServletRequest;
@@ -117,6 +118,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkStatsSaveProducer shortLinkStatsSaveProducer;
     private final GotoDomainWhiteListConfiguration gotoDomainWhiteListConfiguration;
     private final ShortLinkMapper shortLinkMapper;
+    private final BotDetector botDetector;
 
     @Value("${short-link.domain.default}")
     private String createShortLinkDefaultDomain;
@@ -152,18 +154,18 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .fullShortUrl(fullShortUrl)
                 .gid(requestParam.getGid())
                 .build();
-//        try {
-//            // 短链接项目有多少数据？如何解决海量数据存储？详情查看：https://nageoffer.com/shortlink/question
-//            baseMapper.insert(shortLinkDO);
-//            // 短链接数据库分片键是如何考虑的？详情查看：https://nageoffer.com/shortlink/question
-//            shortLinkGotoMapper.insert(linkGotoDO);
-//        } catch (DuplicateKeyException ex) {
-//            // 首先判断是否存在布隆过滤器，如果不存在直接新增
-//            if (!shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl)) {
-//                shortUriCreateCachePenetrationBloomFilter.add(fullShortUrl);
-//            }
-//            throw new ServiceException(String.format("短链接：%s 生成重复", fullShortUrl));
-//        }
+       try {
+           // 短链接项目有多少数据？如何解决海量数据存储？详情查看：https://nageoffer.com/shortlink/question
+           baseMapper.insert(shortLinkDO);
+           // 短链接数据库分片键是如何考虑的？详情查看：https://nageoffer.com/shortlink/question
+           shortLinkGotoMapper.insert(linkGotoDO);
+       } catch (DuplicateKeyException ex) {
+           // 首先判断是否存在布隆过滤器，如果不存在直接新增
+           if (!shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl)) {
+               shortUriCreateCachePenetrationBloomFilter.add(fullShortUrl);
+           }
+           throw new ServiceException(String.format("短链接：%s 生成重复", fullShortUrl));
+       }
         // 项目中短链接缓存预热是怎么做的？详情查看：https://nageoffer.com/shortlink/question
         stringRedisTemplate.opsForValue().set(
                 String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
@@ -473,14 +475,17 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     }
     @SneakyThrows
     @Override
-    public void restoreUrl(String shortUri,String p, ServletRequest request, ServletResponse response, HttpServletRequest requests) {
+    public void restoreUrl(String shortUri, String p, ServletRequest request, ServletResponse response, HttpServletRequest httpRequest) {
+        String clientIp = getClientIp(httpRequest);
+        String userAgent = getClientUserAgent(httpRequest);
+        log.info("[REDIRECT_START] shortUri={} | ip={} | userAgent={}", shortUri, clientIp, userAgent);
+        
+        // 检查链接状态
         if(!getState(shortUri)) {
+            log.warn("[REDIRECT_FAIL] shortUri={} | reason=unactivated | ip={} | userAgent={}", shortUri, clientIp, userAgent);
             throw new RuntimeException("Your Link was unactivated");
         }
 
-//        clickCount(shortUri,p, getClientIp(requests),getClientUserAgent(requests),getClientUserReferer(requests));
-
-        System.out.println("this is method to call shortLink");
         String serverName = request.getServerName();
         String serverPort = Optional.of(request.getServerPort())
                 .filter(each -> !Objects.equals(each, 80))
@@ -488,46 +493,65 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .map(each -> ":" + each)
                 .orElse("");
         String fullShortUrl = serverName + serverPort + "/" + shortUri;
+        
+        // 从缓存获取原始链接
         String originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(originalLink)) {
+            
             ShortLinkStatsRecordDTO shortLinkStatsRecordDTO = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
             shortLinkStats(shortLinkStatsRecordDTO);
             ((HttpServletResponse) response).sendRedirect(originalLink);
-            clickCount(shortUri,p, getClientIp(requests),getClientUserAgent(requests), shortLinkStatsRecordDTO.getUv());
+            log.info("[REDIRECT_SUCCESS_1] shortUri={} | originalLink={} | ip={} | userAgent={}", shortUri, originalLink, clientIp, userAgent);
+            // clickCount(shortUri, p, clientIp, userAgent, shortLinkStatsRecordDTO.getUv());
             return;
         }
+
+        // 布隆过滤器检查
         boolean contains = shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl);
         if (!contains) {
+            log.warn("[REDIRECT_FAIL] shortUri={} | reason=not_found_bloom | ip={} | userAgent={}", shortUri, clientIp, userAgent);
             ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
+
+        // 检查空链接缓存
         String gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
+            log.warn("[REDIRECT_FAIL] shortUri={} | reason=null_link_cache | ip={} | userAgent={}", shortUri, clientIp, userAgent);
             ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
+
         RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
         lock.lock();
         try {
+            // 双重检查缓存
             originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
             if (StrUtil.isNotBlank(originalLink)) {
+                log.info("[REDIRECT_SUCCESS] shortUri={} | originalLink={} | ip={} | userAgent={}", shortUri, originalLink, clientIp, userAgent);
                 shortLinkStats(buildLinkStatsRecordAndSetUser(fullShortUrl, request, response));
                 ((HttpServletResponse) response).sendRedirect(originalLink);
                 return;
             }
+
             gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
             if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
+                log.warn("[REDIRECT_FAIL] shortUri={} | reason=null_link_cache | ip={} | userAgent={}", shortUri, clientIp, userAgent);
                 ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
             }
+
+            // 数据库查询
             LambdaQueryWrapper<ShortLinkGotoDO> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDO.class)
                     .eq(ShortLinkGotoDO::getFullShortUrl, fullShortUrl);
             ShortLinkGotoDO shortLinkGotoDO = shortLinkGotoMapper.selectOne(linkGotoQueryWrapper);
             if (shortLinkGotoDO == null) {
+                log.warn("[REDIRECT_FAIL] shortUri={} | reason=not_found_db | ip={} | userAgent={}", shortUri, clientIp, userAgent);
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
             }
+
             LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
                     .eq(ShortLinkDO::getGid, shortLinkGotoDO.getGid())
                     .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
@@ -535,15 +559,19 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkDO::getEnableStatus, 0);
             ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
             if (shortLinkDO == null || (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().before(new Date()))) {
+                log.warn("[REDIRECT_FAIL] shortUri={} | reason=expired_or_deleted | ip={} | userAgent={}", shortUri, clientIp, userAgent);
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
             }
+
+            // 设置缓存并跳转
             stringRedisTemplate.opsForValue().set(
                     String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
                     shortLinkDO.getOriginUrl(),
                     LinkUtil.getLinkCacheValidTime(shortLinkDO.getValidDate()), TimeUnit.MILLISECONDS
             );
+            log.info("[REDIRECT_SUCCESS] shortUri={} | originalLink={} | ip={} | userAgent={}", shortUri, shortLinkDO.getOriginUrl(), clientIp, userAgent);
             shortLinkStats(buildLinkStatsRecordAndSetUser(fullShortUrl, request, response));
             ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
         } finally {
@@ -681,5 +709,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 //        if (!details.contains(domain)) {
 //            throw new ClientException("演示环境为避免恶意攻击，请生成以下网站跳转链接：" + gotoDomainWhiteListConfiguration.getNames());
 //        }
+    }
+
+    @Override
+    public boolean isBotRequest(HttpServletRequest request) {
+        return botDetector.isBot(request);
     }
 }
