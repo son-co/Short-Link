@@ -1,29 +1,24 @@
 server:
   port: 8101
-
+  tomcat:
+    threads:
+      max: 500
+      min-spare: 200
+    max-connections: 3000
+    accept-count: 1000
+    connection-timeout: 20000
+      
 spring:
-  jpa:
-    properties:
-      hibernate:
-        ddl-auto: update
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        enable_lazy_load_no_trans: true
-        format_sql: true
-    show-sql: true
-    
   application:
     name: short-link-project
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:shardingsphere-config.yaml
   data:
-    datasource:
-      dataSourceClassName: com.zaxxer.hikari.HikariDataSource
-      driverClassName: com.mysql.cj.jdbc.Driver
-      jdbcUrl: jdbc:mysql://8.222.220.102:3306/telcosms_shortlink?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
-      username: david
-      password: david_telcosms_911
     redis:
       host: localhost
       port: 6379
-      password: Test_930910
+      #password: Test_930910
     
   mvc:
     view:
@@ -34,16 +29,18 @@ spring:
       discovery:
         server-addr: 127.0.0.1:8848
 
+#
+
 short-link:
   domain:
-    default: api.shrsms.com
+    default: lyl.la
 #    default: localhost:8101
   stats:
     locale:
       amap-key: 824c511f0997586ea016f979fdb23087
   goto-domain:
     white-list:
-      enable: true
+      enable: false
       names: '拿个offer,知乎,掘金,博客园'
       details:
         - nageoffer.com
