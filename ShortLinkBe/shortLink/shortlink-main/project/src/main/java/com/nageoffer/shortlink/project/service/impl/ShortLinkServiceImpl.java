@@ -69,10 +69,24 @@ import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.Executors;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -82,17 +96,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.time.Duration;
 
 import static com.nageoffer.shortlink.project.common.constant.RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY;
 import static com.nageoffer.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
@@ -401,46 +405,49 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         return false; // Trả về false nếu có lỗi
     }
 
-    private void clickCount(String shortUrl,String p, String clientIp,String userAgent,String cookie) {
+    private void clickCount(String shortUrl, String p, String clientIp, String userAgent, String cookie) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                String api;
+                if (p != null) {
+                    api = "http://localhost:8103/api/v1/consumer/public/click-count/" + shortUrl + "/" + clientIp + "?p=" + p + "&";
+                } else {
+                    api = "http://localhost:8103/api/v1/consumer/public/click-count/" + shortUrl + "/" + clientIp + "?";
+                }
 
-        String api;
-        if(p!=null)
-        // Tạo HttpClient
-            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientIp+"?p="+p+"&";
-        else
-            api = "http://localhost:8103/api/v1/consumer/public/click-count/"+shortUrl+ "/"+clientIp+"?";;
+                if (userAgent != null) {
+                    String encodedUserAgent = URLEncoder.encode(userAgent, StandardCharsets.UTF_8);
+                    api = api + "agent=" + encodedUserAgent + "&";
+                }
 
-        if(userAgent!=null){
-            // Tạo HttpClient
-            String encodedUserAgent = URLEncoder.encode(userAgent, StandardCharsets.UTF_8);
-            api = api+"agent="+encodedUserAgent+"&";
-        }
+                if (cookie != null) {
+                    api = api + "cookie=" + cookie;
+                }
 
-        if(cookie!=null){
-            // Tạo HttpClient
-            api = api+"cookie="+cookie;
+                HttpClient client = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofMillis(100))
+                        .build();
 
-        }
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(api))
+                        .GET()
+                        .timeout(Duration.ofMillis(100))
+                        .build();
 
-        HttpClient client = HttpClient.newHttpClient();
-        log.info("clickCount request url : " + api);
-        // Tạo HttpRequest
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(api)) // Đường dẫn API
-                .GET()                    // Phương thức GET
-                .build();
-        try {
-            // Gửi yêu cầu và nhận phản hồi
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            // In phản hồi ra console (hoặc xử lý theo ý muốn)
-            System.out.println("Response Code: " + response.statusCode());
-            System.out.println("Response Body: " + response.body());
-
-        } catch (IOException | InterruptedException e) {
-            // Xử lý ngoại lệ
-            e.printStackTrace();
-        }
+                client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                        .thenAccept(response -> {
+                            if (response.statusCode() != 200) {
+                                log.error("Click count failed with status code: {}", response.statusCode());
+                            }
+                        })
+                        .exceptionally(throwable -> {
+                            log.error("Click count failed", throwable);
+                            return null;
+                        });
+            } catch (Exception e) {
+                log.error("Error in clickCount", e);
+            }
+        });
     }
 
     public String getClientIp(HttpServletRequest request) {
@@ -473,19 +480,17 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         System.out.println("referer: " + referer);
         return referer;
     }
+
     @SneakyThrows
     @Override
-    public void restoreUrl(String shortUri, String p, ServletRequest request, ServletResponse response, HttpServletRequest httpRequest) {
-        String clientIp = getClientIp(httpRequest);
-        String userAgent = getClientUserAgent(httpRequest);
-        log.info("[REDIRECT_START] shortUri={} | ip={} | userAgent={}", shortUri, clientIp, userAgent);
-        
-        // 检查链接状态
+    public void restoreUrl(String shortUri,String p, ServletRequest request, ServletResponse response, HttpServletRequest requests) {
         if(!getState(shortUri)) {
-            log.warn("[REDIRECT_FAIL] shortUri={} | reason=unactivated | ip={} | userAgent={}", shortUri, clientIp, userAgent);
             throw new RuntimeException("Your Link was unactivated");
         }
 
+//        clickCount(shortUri,p, getClientIp(requests),getClientUserAgent(requests),getClientUserReferer(requests));
+
+        System.out.println("this is method to call shortLink");
         String serverName = request.getServerName();
         String serverPort = Optional.of(request.getServerPort())
                 .filter(each -> !Objects.equals(each, 80))
@@ -493,85 +498,66 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .map(each -> ":" + each)
                 .orElse("");
         String fullShortUrl = serverName + serverPort + "/" + shortUri;
-        
-        // 从缓存获取原始链接
         String originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(originalLink)) {
-            
             ShortLinkStatsRecordDTO shortLinkStatsRecordDTO = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
             shortLinkStats(shortLinkStatsRecordDTO);
             ((HttpServletResponse) response).sendRedirect(originalLink);
-            log.info("[REDIRECT_SUCCESS_1] shortUri={} | originalLink={} | ip={} | userAgent={}", shortUri, originalLink, clientIp, userAgent);
-            // clickCount(shortUri, p, clientIp, userAgent, shortLinkStatsRecordDTO.getUv());
+            clickCount(shortUri,p, getClientIp(requests),getClientUserAgent(requests), shortLinkStatsRecordDTO.getUv());
             return;
         }
-
-        // 布隆过滤器检查
         boolean contains = shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl);
         if (!contains) {
-            log.warn("[REDIRECT_FAIL] shortUri={} | reason=not_found_bloom | ip={} | userAgent={}", shortUri, clientIp, userAgent);
             ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
-
-        // 检查空链接缓存
         String gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
-            log.warn("[REDIRECT_FAIL] shortUri={} | reason=null_link_cache | ip={} | userAgent={}", shortUri, clientIp, userAgent);
             ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
-
         RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
         lock.lock();
         try {
-            // 双重检查缓存
             originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
             if (StrUtil.isNotBlank(originalLink)) {
-                log.info("[REDIRECT_SUCCESS] shortUri={} | originalLink={} | ip={} | userAgent={}", shortUri, originalLink, clientIp, userAgent);
                 shortLinkStats(buildLinkStatsRecordAndSetUser(fullShortUrl, request, response));
                 ((HttpServletResponse) response).sendRedirect(originalLink);
                 return;
             }
-
             gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
             if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
-                log.warn("[REDIRECT_FAIL] shortUri={} | reason=null_link_cache | ip={} | userAgent={}", shortUri, clientIp, userAgent);
                 ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
             }
-
-            // 数据库查询
             LambdaQueryWrapper<ShortLinkGotoDO> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDO.class)
                     .eq(ShortLinkGotoDO::getFullShortUrl, fullShortUrl);
             ShortLinkGotoDO shortLinkGotoDO = shortLinkGotoMapper.selectOne(linkGotoQueryWrapper);
             if (shortLinkGotoDO == null) {
-                log.warn("[REDIRECT_FAIL] shortUri={} | reason=not_found_db | ip={} | userAgent={}", shortUri, clientIp, userAgent);
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
             }
-
             LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
                     .eq(ShortLinkDO::getGid, shortLinkGotoDO.getGid())
                     .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
                     .eq(ShortLinkDO::getDelFlag, 0)
-                    .eq(ShortLinkDO::getEnableStatus, 0);
+                    .eq(ShortLinkDO::getEnableStatus, 0)
+                    .last("LIMIT 1");
             ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
             if (shortLinkDO == null || (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().before(new Date()))) {
+                String clientIp = getClientIp(requests);
+                String userAgent = getClientUserAgent(requests);
                 log.warn("[REDIRECT_FAIL] shortUri={} | reason=expired_or_deleted | ip={} | userAgent={}", shortUri, clientIp, userAgent);
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
             }
-
-            // 设置缓存并跳转
             stringRedisTemplate.opsForValue().set(
                     String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
                     shortLinkDO.getOriginUrl(),
                     LinkUtil.getLinkCacheValidTime(shortLinkDO.getValidDate()), TimeUnit.MILLISECONDS
             );
-            log.info("[REDIRECT_SUCCESS] shortUri={} | originalLink={} | ip={} | userAgent={}", shortUri, shortLinkDO.getOriginUrl(), clientIp, userAgent);
             shortLinkStats(buildLinkStatsRecordAndSetUser(fullShortUrl, request, response));
             ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
         } finally {
@@ -709,10 +695,5 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 //        if (!details.contains(domain)) {
 //            throw new ClientException("演示环境为避免恶意攻击，请生成以下网站跳转链接：" + gotoDomainWhiteListConfiguration.getNames());
 //        }
-    }
-
-    @Override
-    public boolean isBotRequest(HttpServletRequest request) {
-        return botDetector.isBot(request);
     }
 }

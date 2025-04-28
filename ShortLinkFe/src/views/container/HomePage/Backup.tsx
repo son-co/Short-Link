@@ -9,7 +9,7 @@ import { handleApiWithToken } from '@/api';
 import moment from 'moment';
 import { Input } from 'antd';
 import { getCookie } from '@/state/utils/session';
-import { JWT } from '@/configs';
+import { API_URL, JWT } from '@/configs';
 
 const { TextArea } = Input;
 const HomePage = () => {
@@ -67,7 +67,7 @@ const HomePage = () => {
       validDate: moment().local().format('YYYY-MM-DD HH:mm:ss'),
       describe: value.describe || `Short link for ${getDomain(value.originUrl)} readme page`,
     };
-    callApi('https://apiDev.shrsms.com/api/v1/admin/short-link/create', body);
+    callApi(`${API_URL}/api/v1/admin/short-link/create`, body);
   };
 
   function getDomain(url) {

@@ -283,12 +283,18 @@ public class ShortLinkServiceImpl implements ShortLinkService {
         shortLinkDO.setTitle(title);
         shortLinkDO.setTitleUserCreated(requestParam.getTitleUserCreated());
         shortLinkDO.setGroupId(requestParam.getGroupId());
-        
-        // 设置创建者和修改者
+
         String currentUser = SecurityUtils.getCurrentUserLogin().orElse("system");
         shortLinkDO.setCreatedBy(currentUser);
         shortLinkDO.setLastModifiedBy(currentUser);
         
+
+        // Set created_date and last_modified_date
+        Instant now = Instant.now();
+        shortLinkDO.setCreatedDate(now);
+        shortLinkDO.setLastModifiedDate(now);
+        
+
         shortLinkRepository.save(shortLinkDO);
     }
 
